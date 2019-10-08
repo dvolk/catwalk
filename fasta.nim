@@ -20,4 +20,4 @@ proc parse_fasta_file*(filepath: string): (string, string) =
         inc i
 
   mm.close()
-  return (header, sequence)
+  return (filepath, sequence)
