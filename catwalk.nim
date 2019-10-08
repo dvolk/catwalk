@@ -2,6 +2,7 @@ import os
 import tables
 import logging
 import times
+import sets
 
 import cligen
 
@@ -32,6 +33,7 @@ type
     name: string
     reference: Sample
     samples: Table[string, Sample]
+    neighbours: Table[string, seq[(string, int)]]
 
 var
   logger = newConsoleLogger(fmtStr = "[$datetime] - $levelname: ")
@@ -59,7 +61,7 @@ proc ref_snp_distance(cs: CompressedSequence) : int =
   for i in 0..cs.high:
     result += len(cs[i])
 
-proc add_position(cs: var CompressedSequence, base: char, position: int) {.inline.} = 
+proc add_position(cs: var CompressedSequence, base: char, position: int) {.inline.} =
   let index = case base:
     of 'A': 0
     of 'C': 1
@@ -68,7 +70,7 @@ proc add_position(cs: var CompressedSequence, base: char, position: int) {.inlin
     of 'N': 4
     else: 5
   cs[index].add(position)
-              
+
 #
 # Sample
 #
@@ -114,19 +116,41 @@ proc new_CatWalk(name: string, reference: Sample) : CatWalk =
   c.reference = reference
   return c
 
-proc add_sample(c: var CatWalk, sample: var Sample) =
-  sample.reference_compress(c.reference)
-  c.samples[sample.name] = sample
-
-proc add_samples(c: var CatWalk, samples: var seq[Sample]) =
-  for sample in samples.mitems():
-    c.add_sample(sample)
-
 proc snp_distance(c: CatWalk, sample1_name: string, sample2_name: string) : int =
   let
     sample1 = c.samples[sample1_name]
     sample2 = c.samples[sample2_name]
   return count_diff(sample1.diffsets, sample2.diffsets)
+
+proc process_neighbours(c: var CatWalk, sample1: Sample) =
+  for k in c.samples.keys:
+    let
+      sample2 = c.samples[k]
+      d = count_diff(sample1.diffsets, sample2.diffsets)
+    if d <= 50:
+      if not c.neighbours.contains(sample1.name):
+        c.neighbours[sample1.name] = @[]
+      if not c.neighbours.contains(sample2.name):
+        c.neighbours[sample2.name] = @[]
+      c.neighbours[sample1.name].add((sample2.name, d))
+      c.neighbours[sample2.name].add((sample1.name, d))
+
+proc get_neighbours(c: CatWalk, sample_name: string, distance: int = 50) : seq[(string, int)] =
+  result = @[]
+  if not c.neighbours.contains(sample_name):
+    return result
+  for (neighbour_name, neighbour_distance) in c.neighbours[sample_name]:
+    if distance > neighbour_distance:
+      result.add((neighbour_name, neighbour_distance))
+
+proc add_sample(c: var CatWalk, sample: var Sample) =
+  sample.reference_compress(c.reference)
+  c.process_neighbours(sample)
+  c.samples[sample.name] = sample
+
+proc add_samples(c: var CatWalk, samples: var seq[Sample]) =
+  for sample in samples.mitems():
+    c.add_sample(sample)
 
 #
 # Main
@@ -172,17 +196,26 @@ proc main(reference_filepath = "references/R00000039.fa", samples_dir = "fastas1
   let time3 = cpuTime()
   # construct snp difference matrix
   var durations: seq[float]
+  var x = 0
+  var y = 0
   for samA in catwalk.samples.keys:
     var row: seq[int]
+    let time4 = cpuTime()
     for samB in catwalk.samples.keys:
-      if catwalk.samples[samA].status == Ok and catwalk.samples[samB].status == Ok:
-        let time4 = cpuTime()
-        let d = snp_distance(catwalk, samB, samA)
-        durations.add(1000 * (cpuTime() - time4))
-        row.add(d)
+      if y > x:
+        if catwalk.samples[samA].status == Ok and catwalk.samples[samB].status == Ok:
+          let d = snp_distance(catwalk, samB, samA)
+          row.add(d)
+      inc x
+    durations.add(1000 * (cpuTime() - time4))
     #echo row
+    inc y
+    x = 0
   echo "Completed comparisons in: " & $(cpuTime() - time3)
   echo durations
+
+  for k in catwalk.samples.keys:
+    echo k & ": " & $catwalk.get_neighbours(k)
 
 when isMainModule:
   dispatch(main)
