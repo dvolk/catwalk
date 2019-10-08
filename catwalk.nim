@@ -1,8 +1,6 @@
-import os
 import tables
-import logging
-import times
-import sets
+import sequtils
+import intsets
 
 import cligen
 
@@ -14,13 +12,13 @@ type
 
   CompressedSequence = seq[seq[int]]
 
-  SampleStatus = enum
+  SampleStatus* = enum
     Unknown
     InvalidLength
     InvalidQuality
     Ok
 
-  Sample = tuple
+  Sample* = tuple
     name: string
     filepath: string
     sequence: Sequence
@@ -29,14 +27,11 @@ type
     quality: int
     ref_distance: int
 
-  CatWalk = tuple
+  CatWalk* = tuple
     name: string
     reference: Sample
     samples: Table[string, Sample]
     neighbours: Table[string, seq[(string, int)]]
-
-var
-  logger = newConsoleLogger(fmtStr = "[$datetime] - $levelname: ")
 
 #
 # CompressedSequence
@@ -45,16 +40,27 @@ var
 proc empty_compressed_sequence(cs: var CompressedSequence) =
   for i in 0..5: cs.add(@[])
 
-proc compressed_sequence_counts(cs: CompressedSequence) : seq[int] =
+proc compressed_sequence_counts*(cs: CompressedSequence) : seq[int] =
   result = @[]
-  for i in 0..cs.high: result.add(len(cs[i]))
+  for i in 0..5: result.add(len(cs[i]))
 
 proc count_diff(cs1: CompressedSequence, cs2: CompressedSequence) : int =
   var
     diff = 0
-  for i in 0..cs1.high:
+  for i in 0..5:
     diff = diff + count_sym_diff(cs1[i], cs2[i])
   return diff
+
+  
+proc count_diff2(cs1: CompressedSequence, cs2: CompressedSequence) : int =
+  var buf = initIntSet()
+  sym_diff(cs1[0], cs2[0], buf)
+  sym_diff(cs1[1], cs2[1], buf)
+  sym_diff(cs1[2], cs2[2], buf)
+  sym_diff(cs1[3], cs2[3], buf)
+  sym_diff(cs1[4], cs2[4], buf)
+  sym_diff(cs1[5], cs2[5], buf)
+  return len(buf)
 
 proc ref_snp_distance(cs: CompressedSequence) : int =
   result = 0
@@ -75,7 +81,7 @@ proc add_position(cs: var CompressedSequence, base: char, position: int) {.inlin
 # Sample
 #
 
-proc new_Sample(fasta_filepath: string, header: string, sequence: string) : Sample =
+proc new_Sample*(fasta_filepath: string, header: string, sequence: string) : Sample =
   var s: Sample
   s.name = header
   s.sequence = sequence
@@ -110,23 +116,23 @@ proc reference_compress(sample: var Sample, reference: Sample) =
 # CatWalk
 #
 
-proc new_CatWalk(name: string, reference: Sample) : CatWalk =
+proc new_CatWalk*(name: string, reference: Sample) : CatWalk =
   var c: CatWalk
   c.name = name
   c.reference = reference
   return c
 
-proc snp_distance(c: CatWalk, sample1_name: string, sample2_name: string) : int =
+proc snp_distance*(c: CatWalk, sample1_name: string, sample2_name: string) : int =
   let
     sample1 = c.samples[sample1_name]
     sample2 = c.samples[sample2_name]
-  return count_diff(sample1.diffsets, sample2.diffsets)
+  return count_diff2(sample1.diffsets, sample2.diffsets)
 
 proc process_neighbours(c: var CatWalk, sample1: Sample) =
   for k in c.samples.keys:
     let
       sample2 = c.samples[k]
-      d = count_diff(sample1.diffsets, sample2.diffsets)
+      d = count_diff2(sample1.diffsets, sample2.diffsets)
     if d <= 50:
       if not c.neighbours.contains(sample1.name):
         c.neighbours[sample1.name] = @[]
@@ -135,7 +141,16 @@ proc process_neighbours(c: var CatWalk, sample1: Sample) =
       c.neighbours[sample1.name].add((sample2.name, d))
       c.neighbours[sample2.name].add((sample1.name, d))
 
-proc get_neighbours(c: CatWalk, sample_name: string, distance: int = 50) : seq[(string, int)] =
+proc add_sample*(c: var CatWalk, sample: var Sample) =
+  sample.reference_compress(c.reference)
+  c.process_neighbours(sample)
+  c.samples[sample.name] = sample
+
+proc add_samples*(c: var CatWalk, samples: var seq[Sample]) =
+  for sample in samples.mitems():
+    c.add_sample(sample)
+
+proc get_neighbours*(c: CatWalk, sample_name: string, distance: int = 50) : seq[(string, int)] =
   result = @[]
   if not c.neighbours.contains(sample_name):
     return result
@@ -143,79 +158,4 @@ proc get_neighbours(c: CatWalk, sample_name: string, distance: int = 50) : seq[(
     if distance > neighbour_distance:
       result.add((neighbour_name, neighbour_distance))
 
-proc add_sample(c: var CatWalk, sample: var Sample) =
-  sample.reference_compress(c.reference)
-  c.process_neighbours(sample)
-  c.samples[sample.name] = sample
 
-proc add_samples(c: var CatWalk, samples: var seq[Sample]) =
-  for sample in samples.mitems():
-    c.add_sample(sample)
-
-#
-# Main
-#
-
-proc main(reference_filepath = "references/R00000039.fa", samples_dir = "fastas1") =
-  proc log_mem_used =
-    logger.log(lvlDebug, "Memory used: " & $(getOccupiedMem() / 1_000_000))
-
-  # create catwalk
-  var
-    (ref_header, ref_seq) = parse_fasta_file(reference_filepath)
-    catwalk = new_CatWalk("test", new_Sample(reference_filepath, ref_header, ref_seq))
-
-  # load samples
-  let time1 = cpuTime()
-  var
-    samples: seq[Sample]
-  for kind, path in walkDir(samples_dir):
-    log_mem_used()
-    logger.log(lvlInfo, "adding " & path)
-    let
-      (sample_header, sample_seq) = parse_fasta_file(path)
-    samples.add(new_Sample(path, sample_header, sample_seq))
-  echo "Parsed fasta files in: " & $(cpuTime() - time1)
-
-  # add samples to catwalk
-  let time2 = cpuTime()
-  catwalk.add_samples(samples)
-  samples = @[]
-  log_mem_used()
-  echo "Added samples to catwalk in: " & $(cpuTime() - time2)
-
-  # show stats
-  echo "file,status,quality,refdistance"
-  for samA in catwalk.samples.keys:
-    echo catwalk.samples[samA].filepath &
-      "," & $catwalk.samples[samA].status &
-      "," & $catwalk.samples[samA].quality &
-      "," & $catwalk.samples[samA].refdistance &
-      "," & $compressed_sequence_counts(catwalk.samples[samA].diffsets)
-
-  let time3 = cpuTime()
-  # construct snp difference matrix
-  var durations: seq[float]
-  var x = 0
-  var y = 0
-  for samA in catwalk.samples.keys:
-    var row: seq[int]
-    let time4 = cpuTime()
-    for samB in catwalk.samples.keys:
-      if y > x:
-        if catwalk.samples[samA].status == Ok and catwalk.samples[samB].status == Ok:
-          let d = snp_distance(catwalk, samB, samA)
-          row.add(d)
-      inc x
-    durations.add(1000 * (cpuTime() - time4))
-    #echo row
-    inc y
-    x = 0
-  echo "Completed comparisons in: " & $(cpuTime() - time3)
-  echo durations
-
-  for k in catwalk.samples.keys:
-    echo k & ": " & $catwalk.get_neighbours(k)
-
-when isMainModule:
-  dispatch(main)

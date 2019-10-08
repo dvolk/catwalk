@@ -8,7 +8,8 @@ import argh
 def plot_array(array_filename, xlabel, ylabel, ylim_low, ylim_high, dpi=200, regression=False):
     sns.set()
 
-    Y = eval(open(array_filename).read())
+    file_content = open(array_filename).read().replace('\n', '')
+    Y = eval(file_content)
     
     mpl.rcParams['figure.dpi'] = dpi
 
