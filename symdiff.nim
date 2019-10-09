@@ -1,8 +1,9 @@
 ## This module contains a function to compute the symmetric
 ## difference of two int arrays.
 
-import sequtils
 import intsets
+import times
+import sequtils
 
 proc count_sym_diff*(xs: seq[int], ys: seq[int]) : int =
   let
@@ -37,14 +38,13 @@ proc count_sym_diff*(xs: seq[int], ys: seq[int]) : int =
 
   return count + (last2 - first2)
 
-proc sym_diff*(xs: seq[int], ys: seq[int], buf: var IntSet) =
+proc sym_diff1*(xs: seq[int], ys: seq[int], buf: var IntSet) =
   let
     last1 = len(xs) - 1
     last2 = len(ys) - 1
   var
     first1 = 0
     first2 = 0
-
 
   if last1 < 0:
     for y in ys:
@@ -55,7 +55,7 @@ proc sym_diff*(xs: seq[int], ys: seq[int], buf: var IntSet) =
       buf.incl(x)
     return
 
-  if xs[last1] < ys[first2]:
+65;5602;1c  if xs[last1] < ys[first2]:
     for x in xs:
       buf.incl(x)
     for y in ys:
@@ -80,17 +80,105 @@ proc sym_diff*(xs: seq[int], ys: seq[int], buf: var IntSet) =
   for j in first2..last2-1:
     buf.incl(ys[j])
 
+proc sum_sym_diff1*(xs0, xs1, xs2, xs3, xs4, xs5, xs6, xs7, xs8, xs9, xs10, xs11: seq[int]) : int =
+  var
+    buf2 = initIntSet()
+  symdiff1(xs0, xs1, buf2)
+  symdiff1(xs2, xs3, buf2)
+  symdiff1(xs4, xs5, buf2)
+  symdiff1(xs6, xs7, buf2)
+  symdiff1(xs8, xs9, buf2)
+  symdiff1(xs10, xs11, buf2)
+  result = buf2.len
+
+proc sym_diff2*(xs: seq[int], ys: seq[int], buf: var seq[int]) =
+  let
+    last1 = len(xs) - 1
+    last2 = len(ys) - 1
+  var
+    first1 = 0
+    first2 = 0
+
+  if last1 < 0:
+    for y in ys:
+      buf.add(y)
+    return
+  if last2 < 0:
+    for x in xs:
+      buf.add(x)
+    return
+
+  if xs[last1] < ys[first2]:
+    for x in xs:
+      buf.add(x)
+    for y in ys:
+      buf.add(y)
+    return
+
+  while first1 != last1:
+    if first2 == last2:
+      for j in first1..last1-1:
+        buf.add(xs[j])
+      return
+    if xs[first1] < ys[first2]:
+      buf.add(xs[first1])
+      inc first1
+    else:
+      if ys[first2] < xs[first1]:
+        buf.add(ys[first2])
+      else:
+        inc first1
+      inc first2
+
+  for j in first2..last2-1:
+    buf.add(ys[j])
+    
+proc sum_sym_diff2*(xs0, xs1, xs2, xs3, xs4, xs5, xs6, xs7, xs8, xs9, xs10, xs11: seq[int]) : int =
+  var
+    buf2 = newSeqOfCap[int](8 * 4_500_000)
+  symdiff2(xs0, xs1, buf2)
+  symdiff2(xs2, xs3, buf2)
+  symdiff2(xs4, xs5, buf2)
+  symdiff2(xs6, xs7, buf2)
+  symdiff2(xs8, xs9, buf2)
+  symdiff2(xs10, xs11, buf2)
+  result = buf2.deduplicate.len
+  
 when isMainModule:
   var
-    buf = initIntSet()
-  symdiff(@[1,2,3], @[5,6,7], buf)
-  symdiff(@[1,2,3], @[1,2,3], buf)
-  symdiff(@[], @[1,2,3], buf)
-  symdiff(@[1,2,3], @[], buf)
-  symdiff(@[8,9,10], @[11, 12, 13], buf)
-  let l = len(buf)
+    xs1: seq[int]
+    xs2: seq[int]
+    xs3: seq[int]
+    xs4: seq[int]
+    xs5: seq[int]
+    xs6: seq[int]
+    xs7: seq[int]
+    xs8: seq[int]
+    xs9: seq[int]
+    xs10: seq[int]
+    xs11: seq[int]
+    xs12: seq[int]
+
+  for x in 0..100_000:
+    xs1.add(x)
+    xs2.add(x + 10)
+    xs3.add(x + 100000)
+    xs4.add(x - 100000)
+    xs5.add(x)
+    xs6.add(x * 2)
+    xs7.add(x * 3)
+    xs8.add(x * 4)
+    xs9.add(x)
+    xs10.add(x + 1000)
+    xs11.add(x - 1000)
+    xs12.add(x)
+
+  let time1 = cpuTime()
+  var l: int
+  for _ in 0..1:
+    l = sum_sym_diff2(xs1, xs2, xs3, xs4, xs5, xs6, xs7, xs8, xs9, xs10, xs11, xs12)
+  echo cpuTime() - time1
   echo l
-  echo buf
-  assert l == 12
+  assert l == 342168
 
   

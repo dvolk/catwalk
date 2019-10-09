@@ -1,6 +1,9 @@
 import tables
 import sequtils
 import intsets
+import sets
+import algorithm
+import times
 
 import cligen
 
@@ -10,7 +13,7 @@ import fasta
 type
   Sequence = string
 
-  CompressedSequence = seq[seq[int]]
+  CompressedSequence = seq[IntSet]
 
   SampleStatus* = enum
     Unknown
@@ -31,40 +34,38 @@ type
     name: string
     reference: Sample
     samples: Table[string, Sample]
-    neighbours: Table[string, seq[(string, int)]]
+    neighbours: Table[(string, string), int]
 
 #
 # CompressedSequence
 #
 
 proc empty_compressed_sequence(cs: var CompressedSequence) =
-  for i in 0..5: cs.add(@[])
+  cs.setLen(6)
+  for i in 0..5: cs[i] = initIntSet()
 
 proc compressed_sequence_counts*(cs: CompressedSequence) : seq[int] =
   result = @[]
   for i in 0..5: result.add(len(cs[i]))
 
-proc count_diff(cs1: CompressedSequence, cs2: CompressedSequence) : int =
-  var
-    diff = 0
-  for i in 0..5:
-    diff = diff + count_sym_diff(cs1[i], cs2[i])
-  return diff
+#proc count_diff(cs1: CompressedSequence, cs2: CompressedSequence) : int =
+#  var
+#    diff = 0
+#  for i in 0..5:
+#    diff = diff + count_sym_diff(cs1[i], cs2[i])
+#  return diff
 
-  
 proc count_diff2(cs1: CompressedSequence, cs2: CompressedSequence) : int =
-  var buf = initIntSet()
-  sym_diff(cs1[0], cs2[0], buf)
-  sym_diff(cs1[1], cs2[1], buf)
-  sym_diff(cs1[2], cs2[2], buf)
-  sym_diff(cs1[3], cs2[3], buf)
-  sym_diff(cs1[4], cs2[4], buf)
-  sym_diff(cs1[5], cs2[5], buf)
-  return len(buf)
+  return sym_diff2(cs1[0], cs2[0],
+                   cs1[1], cs2[1],
+                   cs1[2], cs2[2],
+                   cs1[3], cs2[3],
+                   cs1[4], cs2[4],
+                   cs1[5], cs2[5])
 
 proc ref_snp_distance(cs: CompressedSequence) : int =
   result = 0
-  for i in 0..cs.high:
+  for i in 0..5:
     result += len(cs[i])
 
 proc add_position(cs: var CompressedSequence, base: char, position: int) {.inline.} =
@@ -75,7 +76,7 @@ proc add_position(cs: var CompressedSequence, base: char, position: int) {.inlin
     of 'T': 3
     of 'N': 4
     else: 5
-  cs[index].add(position)
+  cs[index].incl(position)
 
 #
 # Sample
@@ -130,32 +131,32 @@ proc snp_distance*(c: CatWalk, sample1_name: string, sample2_name: string) : int
 
 proc process_neighbours(c: var CatWalk, sample1: Sample) =
   for k in c.samples.keys:
+    if k == sample1.name:
+      continue
+    if c.neighbours.contains((sample1.name, k)) or c.neighbours.contains((k, sample1.name)):
+      continue
     let
       sample2 = c.samples[k]
       d = count_diff2(sample1.diffsets, sample2.diffsets)
     if d <= 50:
-      if not c.neighbours.contains(sample1.name):
-        c.neighbours[sample1.name] = @[]
-      if not c.neighbours.contains(sample2.name):
-        c.neighbours[sample2.name] = @[]
-      c.neighbours[sample1.name].add((sample2.name, d))
-      c.neighbours[sample2.name].add((sample1.name, d))
+      c.neighbours[(k, sample2.name)] = d
+      c.neighbours[(sample1.name, k)] = d
 
 proc add_sample*(c: var CatWalk, sample: var Sample) =
   sample.reference_compress(c.reference)
-  c.process_neighbours(sample)
   c.samples[sample.name] = sample
 
 proc add_samples*(c: var CatWalk, samples: var seq[Sample]) =
   for sample in samples.mitems():
     c.add_sample(sample)
+  echo "processing neighbours"
+  let time1 = cpuTime()
+  for sample in samples.mitems():
+    c.process_neighbours(sample)
+  echo "processing nighbours took: " & $(cpuTime() - time1)
 
 proc get_neighbours*(c: CatWalk, sample_name: string, distance: int = 50) : seq[(string, int)] =
   result = @[]
-  if not c.neighbours.contains(sample_name):
-    return result
-  for (neighbour_name, neighbour_distance) in c.neighbours[sample_name]:
-    if distance > neighbour_distance:
-      result.add((neighbour_name, neighbour_distance))
-
-
+  for (s1, s2) in c.neighbours.keys:
+    if s1 == sample_name:
+      result.add((s2, c.neighbours[(s1, s2)]))
