@@ -13,7 +13,7 @@ def plot_array(array_filename, xlabel, ylabel, ylim_low, ylim_high, dpi=200, reg
     
     mpl.rcParams['figure.dpi'] = dpi
 
-    plt.plot(Y)
+    plt.plot(Y, 'x')
 
     if regression:
         X = np.arange(0, len(Y)).reshape(-1, 1)

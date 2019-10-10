@@ -80,15 +80,21 @@ proc sym_diff1*(xs: seq[int], ys: seq[int], buf: var IntSet) =
   for j in first2..last2-1:
     buf.incl(ys[j])
 
-proc sum_sym_diff1*(xs0, xs1, xs2, xs3, xs4, xs5, xs6, xs7, xs8, xs9, xs10, xs11: seq[int]) : int =
+proc sum_sym_diff1*(xs0, xs1, xs2, xs3, xs4, xs5, xs6, xs7, xs8, xs9, xs10, xs11: seq[int], max_dist: int) : int =
   var
     buf2 = initIntSet()
   symdiff1(xs0, xs1, buf2)
+  if buf2.len > max_dist: return max_dist + 1
   symdiff1(xs2, xs3, buf2)
+  if buf2.len > max_dist: return max_dist + 1
   symdiff1(xs4, xs5, buf2)
+  if buf2.len > max_dist: return max_dist + 1
   symdiff1(xs6, xs7, buf2)
+  if buf2.len > max_dist: return max_dist + 1
   symdiff1(xs8, xs9, buf2)
+  if buf2.len > max_dist: return max_dist + 1
   symdiff1(xs10, xs11, buf2)
+  if buf2.len > max_dist: return max_dist + 1
   result = buf2.len
 
 proc sym_diff2*(xs: seq[int], ys: seq[int], buf: var seq[int]) =

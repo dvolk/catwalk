@@ -5,10 +5,7 @@ import sets
 import algorithm
 import times
 
-import cligen
-
 import symdiff
-import fasta
 
 type
   Sequence = string
@@ -35,6 +32,8 @@ type
     reference: Sample
     samples: Table[string, Sample]
     neighbours: Table[(string, string), int]
+    process_times: seq[float]
+    max_distance: int
 
 #
 # CompressedSequence
@@ -48,20 +47,14 @@ proc compressed_sequence_counts*(cs: CompressedSequence) : seq[int] =
   result = @[]
   for i in 0..5: result.add(len(cs[i]))
 
-#proc count_diff(cs1: CompressedSequence, cs2: CompressedSequence) : int =
-#  var
-#    diff = 0
-#  for i in 0..5:
-#    diff = diff + count_sym_diff(cs1[i], cs2[i])
-#  return diff
-
-proc count_diff2(cs1: CompressedSequence, cs2: CompressedSequence) : int =
+proc count_diff2(cs1: CompressedSequence, cs2: CompressedSequence, max_distance: int) : int =
   return sum_sym_diff1(cs1[0], cs2[0],
                        cs1[1], cs2[1],
                        cs1[2], cs2[2],
                        cs1[3], cs2[3],
                        cs1[4], cs2[4],
-                       cs1[5], cs2[5])
+                       cs1[5], cs2[5],
+                       max_distance)
 
 proc ref_snp_distance(cs: CompressedSequence) : int =
   result = 0
@@ -103,7 +96,7 @@ proc reference_compress(sample: var Sample, reference: Sample) =
          reference.sequence[i] != 'N' and reference.sequence[i] != '-':
         sample.diffsets.add_position(sample.sequence[i], i)
 
-  #sample.sequence = ""
+  sample.sequence = ""
   sample.ref_distance = ref_snp_distance(sample.diffsets)
   sample.quality = (100 * ((reference.sequence.high - sample.ref_distance) / reference.sequence.high)).int
 
@@ -121,13 +114,14 @@ proc new_CatWalk*(name: string, reference: Sample) : CatWalk =
   var c: CatWalk
   c.name = name
   c.reference = reference
+  c.max_distance = 20
   return c
 
-proc snp_distance*(c: CatWalk, sample1_name: string, sample2_name: string) : int =
+proc snp_distance(c: CatWalk, sample1_name: string, sample2_name: string) : int =
   let
     sample1 = c.samples[sample1_name]
     sample2 = c.samples[sample2_name]
-  return count_diff2(sample1.diffsets, sample2.diffsets)
+  return count_diff2(sample1.diffsets, sample2.diffsets, 10_000_000)
 
 proc process_neighbours(c: var CatWalk, sample1: Sample) =
   if sample1.status != Ok:
@@ -141,23 +135,19 @@ proc process_neighbours(c: var CatWalk, sample1: Sample) =
       continue
     let
       sample2 = c.samples[k]
-      d = count_diff2(sample1.diffsets, sample2.diffsets)
-    if d <= 50:
+      d = count_diff2(sample1.diffsets, sample2.diffsets, c.max_distance)
+    if d <= c.max_distance:
       c.neighbours[(k, sample1.name)] = d
       c.neighbours[(sample1.name, k)] = d
 
-proc add_sample*(c: var CatWalk, sample: var Sample) =
-  sample.reference_compress(c.reference)
-  c.samples[sample.name] = sample
-
 proc add_samples*(c: var CatWalk, samples: var seq[Sample]) =
   for sample in samples.mitems():
-    c.add_sample(sample)
-  echo "processing neighbours"
-  let time1 = cpuTime()
+    sample.reference_compress(c.reference)
+    c.samples[sample.name] = sample
   for sample in samples.mitems():
+    let time1 = cpuTime()
     c.process_neighbours(sample)
-  echo "processing nighbours took: " & $(cpuTime() - time1)
+    c.process_times.add(cpuTime() - time1)
 
 proc get_neighbours*(c: CatWalk, sample_name: string, distance: int = 50) : seq[(string, int)] =
   result = @[]
@@ -166,7 +156,7 @@ proc get_neighbours*(c: CatWalk, sample_name: string, distance: int = 50) : seq[
       result.add((s2, c.neighbours[(s1, s2)]))
 
 #
-#
+# test
 #
 when isMainModule:
   let

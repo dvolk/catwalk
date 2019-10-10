@@ -7,7 +7,7 @@ import fasta
 
 var
   instance_name = "test"
-  (x, refseq) = parse_fasta_file("references/R00000039.fa")
+  (_, refseq) = parse_fasta_file("references/R00000039.fa")
   reference = new_Sample("R00000039.fa", "R00000039.fa", refseq)
   c = new_CatWalk(instance_name, reference)
 
@@ -58,6 +58,8 @@ routes:
       ret = newJArray()
     for n in ns:
       ret.add(%*(@[n[0], $n[1]]))
-
     resp ret
+
+  get "/process_times":
+    resp %*(c.process_times)
     
