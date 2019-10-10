@@ -55,7 +55,7 @@ proc sym_diff1*(xs: seq[int], ys: seq[int], buf: var IntSet) =
       buf.incl(x)
     return
 
-65;5602;1c  if xs[last1] < ys[first2]:
+  if xs[last1] < ys[first2]:
     for x in xs:
       buf.incl(x)
     for y in ys:
@@ -135,7 +135,7 @@ proc sym_diff2*(xs: seq[int], ys: seq[int], buf: var seq[int]) =
     
 proc sum_sym_diff2*(xs0, xs1, xs2, xs3, xs4, xs5, xs6, xs7, xs8, xs9, xs10, xs11: seq[int]) : int =
   var
-    buf2 = newSeqOfCap[int](8 * 4_500_000)
+    buf2 = newSeqOfCap[int](8000000)
   symdiff2(xs0, xs1, buf2)
   symdiff2(xs2, xs3, buf2)
   symdiff2(xs4, xs5, buf2)
@@ -173,12 +173,22 @@ when isMainModule:
     xs11.add(x - 1000)
     xs12.add(x)
 
-  let time1 = cpuTime()
+  var time1: float
   var l: int
+
+  echo "with intset"
+  time1 = cpuTime()
+  for _ in 0..1:
+    l = sum_sym_diff1(xs1, xs2, xs3, xs4, xs5, xs6, xs7, xs8, xs9, xs10, xs11, xs12)
+  echo cpuTime() - time1
+  echo l
+  assert l == 342168
+
+  echo "with seq[int]"
+  time1 = cpuTime()
   for _ in 0..1:
     l = sum_sym_diff2(xs1, xs2, xs3, xs4, xs5, xs6, xs7, xs8, xs9, xs10, xs11, xs12)
   echo cpuTime() - time1
   echo l
   assert l == 342168
-
   
