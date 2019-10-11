@@ -14,7 +14,7 @@ You get out the friendship!!
 
     nimble build
 
-This creates two binaries: cw_server and cw_client
+This creates two binaries: `cw_server` and `cw_client`
 
 ## Using cw_server
 
@@ -46,3 +46,9 @@ It's pretty good but if you want it even faster you can compile manually:
 - lower memory usage
 - faster performance
 - better EW emulation
+
+## Misc
+
+`utils/plot_array.py` is a script that can take dumps from `cw_client process_times` and draw graphs like so:
+
+![](https://gitea.mmmoxford.uk/dvolk/catwalk/raw/branch/master/doc/perf.png)
