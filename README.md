@@ -44,10 +44,11 @@ It's pretty good but if you want it even faster you can compile manually:
 
 ## TODO
 
-- configuration/command-line arguments for cw_server
-- lower memory usage (current ~700kb/sample)
-- faster performance
-- better EW emulation
+- Configuration/command-line arguments for cw_server
+- Better EW emulation
+- Web UI
+- Lower memory usage (current ~700kb/sample)
+- Faster performance
 
 ## Misc
 
