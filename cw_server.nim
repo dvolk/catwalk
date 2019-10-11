@@ -1,15 +1,18 @@
 import json
 import tables
 import jester
+import intsets
 
 import catwalk
 import fasta
 
-var
+let
   instance_name = "test"
   (_, refseq) = parse_fasta_file("references/R00000039.fa")
   reference = new_Sample("R00000039.fa", "R00000039.fa", refseq)
-  c = new_CatWalk(instance_name, reference)
+  mask = new_Mask("TB-exclude-adaptive", readFile("references/TB-exclude-adaptive.txt"))
+var
+  c = new_CatWalk(instance_name, reference, mask)
 
 template check_param(p: string) =
   if not js.contains(p):
@@ -29,9 +32,9 @@ routes:
 
   get "/list_samples":
     var
-      ret: seq[string]
-    for k in c.samples.keys:
-      ret.add(k)
+      ret: string
+    for s in c.samples.values:
+      ret = ret & $[s.name, $s.status, $s.n_positions.len] & "\n"
     resp $ret
 
   post "/add_sample":
