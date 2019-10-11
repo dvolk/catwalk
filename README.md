@@ -13,3 +13,36 @@ You get out the friendship!!
 ## Building
 
     nimble build
+
+This creates two binaries: cw_server and cw_client
+
+## Using cw_server
+
+    ./cw_server
+
+## Using cw_client
+
+    ./cw_client
+    Usage:
+      cw_client {SUBCMD}  [sub-command options & parameters]
+    where {SUBCMD} is one of:
+      help           print comprehensive or per-cmd help
+      info           
+      add_sample     
+      neighbours     
+      list_samples   
+      process_times  
+
+## Performance
+
+It's pretty good but if you want it even faster you can compile manually:
+
+    nim c -d:release -d:danger --opt:speed src/cw_server
+    nim c -d:release -d:danger --opt:speed src/cw_client
+
+## TODO
+
+- configuration for cw_server
+- lower memory usage
+- faster performance
+- better EW emulation
