@@ -2,9 +2,7 @@
 
 ## Description
 
-You put in the pasta!!
-
-You get out the friendship!!
+CatWalk is a service where you insert bacterial fasta files and then query relationships between them.
 
 ## Requirements
 
