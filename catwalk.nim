@@ -1,4 +1,3 @@
-
 import tables
 import sequtils
 import intsets
@@ -12,7 +11,7 @@ import symdiff
 type
   Sequence = string
 
-  CompressedSequence = seq[seq[int]]
+  CompressedSequence = array[4, seq[int]]
 
   SampleStatus* = enum
     Unknown
@@ -54,7 +53,6 @@ type
 #
 
 proc empty_compressed_sequence(cs: var CompressedSequence) =
-  cs.setLen(4)
   for i in 0..3: cs[i] = @[]
 
 proc compressed_sequence_counts*(cs: CompressedSequence) : seq[int] =
@@ -66,8 +64,6 @@ proc count_diff2(cs1: CompressedSequence, cs2: CompressedSequence, sample1_n_pos
                        cs1[1], cs2[1],
                        cs1[2], cs2[2],
                        cs1[3], cs2[3],
-                       cs1[4], cs2[4],
-                       cs1[5], cs2[5],
                        sample1_n_positions, sample2_n_positions,
                        max_distance)
 
@@ -131,9 +127,6 @@ proc reference_compress(sample: var Sample, reference: Sample, mask: Mask, max_n
     sample.status = TooManyNs
     empty_compressed_sequence(sample.diffsets)
     sample.n_positions = initIntSet()
-  #elif sample.quality < min_quality:
-  #  sample.status = InvalidQuality
-  #  empty_compressed_sequence(sample.diffsets)
   else:
     sample.status = Ok
 
@@ -163,12 +156,6 @@ proc new_CatWalk*(name: string, reference: Sample, mask: Mask) : CatWalk =
   c.settings.max_n_positions = 1000000
   c.settings.min_quality = 80
   return c
-
-#proc snp_distance(c: CatWalk, sample1_name: string, sample2_name: string) : int =
-#  let
-#    sample1 = c.samples[sample1_name]
-#    sample2 = c.samples[sample2_name]
-#  return count_diff2(sample1.diffsets, sample2.diffsets, 10_000_000)
 
 proc process_neighbours(c: var CatWalk, sample1: Sample) =
   if sample1.status != Ok:
