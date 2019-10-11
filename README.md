@@ -4,6 +4,10 @@
 
 CatWalk is a service where you insert bacterial fasta files and then query relationships between them.
 
+## Status
+
+*Experimental*
+
 ## Requirements
 
 - nim >= 1.0.0
