@@ -40,8 +40,8 @@ It's pretty good but if you want it even faster you can compile manually:
 
 ## TODO
 
-- configuration for cw_server
-- lower memory usage
+- configuration/command-line arguments for cw_server
+- lower memory usage (current ~700kb/sample)
 - faster performance
 - better EW emulation
 
