@@ -1,3 +1,4 @@
+import os
 import tables
 import sequtils
 import intsets
@@ -7,6 +8,7 @@ import strutils
 import times
 
 import symdiff
+import fasta
 
 type
   Sequence = string
@@ -178,10 +180,27 @@ proc add_samples*(c: var CatWalk, samples: var seq[Sample]) =
   for sample in samples.mitems():
     sample.reference_compress(c.reference, c.mask, c.settings.max_n_positions, c.settings.min_quality)
     c.samples[sample.name] = sample
+
   for sample in samples.mitems():
     let time1 = cpuTime()
     c.process_neighbours(sample)
     c.process_times.add(cpuTime() - time1)
+
+# TODO this shouldn't be here
+proc add_samples_from_dir*(c: var CatWalk, samples_dir: string) =
+  var
+    samples: seq[Sample]
+  for kind, path in walkDir(samples_dir):
+    let
+      (sample_header, sample_seq) = parse_fasta_file(path)
+    var
+      xs = path.split('/')
+      xs_last = xs[xs.len - 1]
+      name = xs_last.replace(".fasta", "").replace(".fa", "")
+
+    samples.add(new_Sample(name, name, sample_seq))
+  # add samples to catwalk
+  c.add_samples(samples)
 
 proc get_neighbours*(c: CatWalk, sample_name: string, distance: int = 50) : seq[(string, int)] =
   result = @[]
@@ -208,11 +227,7 @@ when isMainModule:
   c.settings.max_distance = 20
   c.settings.max_n_positions = 2
 
-  s = @[s1, s2, s5]
-  c.add_samples(s)
-  s = @[s3]
-  c.add_samples(s)
-  s = @[s4]
+  s = @[s1, s2, s5, s3, s4]
   c.add_samples(s)
 
   echo reference

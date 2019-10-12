@@ -1,41 +1,76 @@
 import json
 import tables
-import jester
 import intsets
+import strutils
+import marshal
 
 import catwalk
 import fasta
 
-let
-  instance_name = "test"
-  (_, refseq) = parse_fasta_file("references/R00000039.fa")
-  reference = new_Sample("R00000039.fa", "R00000039.fa", refseq)
-  mask = new_Mask("TB-exclude-adaptive", readFile("references/TB-exclude-adaptive.txt"))
-var
-  c = new_CatWalk(instance_name, reference, mask)
+import jester
+import cligen
+
+var c: CatWalk
 
 template check_param(p: string) =
   if not js.contains(p):
     resp "Missing parameter: " & p
-  
-routes:
+
+proc `%`(s: Sample): JsonNode =
+  %[("name", %s.name), ("status", %s.status), ("n_positions_len", %s.n_positions.len), ("quality", %s.quality)]
+
+router app:
   get "/info":
+    var
+      n_ok_samples = 0
+
+    #for k in c.samples.keys:
+    #  if c.samples[k].status == Ok:
+    #    n_ok_samples = n_ok_samples = 1
+
     resp %*{ "name": c.name,
              "reference_name": c.reference.name,
              "reference_sequence_length": c.reference.sequence.len,
-             "total_mem": $getTotalMem(),
-             "occupied_mem": $getOccupiedMem()
+             "mask_name": c.mask.name,
+             "mask_positions": c.mask.positions.len,
+             "max_distance": c.settings.max_distance,
+             "max_n_positions": c.settings.max_n_positions,
+             "total_mem": getTotalMem(),
+             "occupied_mem": getOccupiedMem(),
+             "n_samples": c.samples.len,
+             "n_ok_samples": n_ok_samples,
+             "n_neighbour_entries": c.neighbours.len
            }
-       
+
   get "/debug":
-    resp $c
+    resp %*($c)
 
   get "/list_samples":
     var
       ret: string
     for s in c.samples.values:
       ret = ret & $[s.name, $s.status, $s.n_positions.len] & "\n"
-    resp $ret
+    resp %*c.samples
+
+  get "/get_sample/@name":
+    resp %*(c.samples[@"name"])
+
+  get "/get_samples/@from/@to":
+    var
+      i = parseInt(@"from")
+      j = parseInt(@"to")
+    if i < 0:
+      i = 0
+    if j >= len(c.samples):
+      j = len(c.samples) - 1
+    var
+      r: seq[JsonNode]
+      n = 0
+    for k in c.samples.keys:
+      if n > i and n <= j:
+        r.add(%*c.samples[k])
+      inc n
+    resp %*(r)
 
   post "/add_sample":
     let
@@ -54,15 +89,53 @@ routes:
 
     resp "Added " & js["name"].getStr()
 
+  post "/add_dir":
+    let
+      js = parseJson(request.body)
+    check_param "samples_dir"
+
+    c.add_samples_from_dir(js["samples_dir"].getStr())
+    resp "ok"
+
   get "/neighbours/@name/@distance":
     let
       ns = c.get_neighbours(@"name")
     var
       ret = newJArray()
     for n in ns:
-      ret.add(%*(@[n[0], $n[1]]))
+      ret.add(%*[n[0], $n[1]])
     resp ret
 
   get "/process_times":
     resp %*(c.process_times)
-    
+
+  get "/save":
+    writeFile("samples.dat", $$c.samples)
+    writeFile("neighbours.dat", $$c.neighbours)
+
+  get "/load":
+    c.samples = to[Table[string, Sample]](readFile("samples.dat"))
+    c.neighbours = to[Table[(string, string), int]](readFile("neighbours.dat"))
+
+proc main(bind_host: string = "0.0.0.0",
+          bind_port: int = 5000,
+          instance_name: string,
+          reference_name: string,
+          reference_filepath: string,
+          mask_name: string,
+          mask_filepath: string) =
+  let
+    (_, refseq) = parse_fasta_file(reference_filepath)
+    reference = new_Sample(reference_name, reference_filepath, refseq)
+    mask = new_Mask(mask_name, readFile(mask_filepath))
+
+  c = new_CatWalk(instance_name, reference, mask)
+
+  var
+    port = bind_port.Port
+    settings = newSettings(bindAddr=bind_host, port=port)
+    jester = initJester(app, settings=settings)
+  jester.serve()
+
+when isMainModule:
+  dispatch(main)

@@ -8,7 +8,6 @@ import cligen
 
 import fasta
 
-randomize()
 var client = newHttpClient()
 
 proc info() =
@@ -29,6 +28,16 @@ proc add_sample(fasta_filepath: string) =
   let response = client.request("http://127.0.0.1:5000/add_sample", httpMethod = HttpPost, body = $body)
   echo response.body
 
+proc add_samples_from_dir(samples_dir: string) =
+  let body = %*{
+    "samples_dir": samples_dir
+  }
+
+  client.headers = newHttpHeaders({ "Content-Type": "application/json" })
+  let r = client.request("http://127.0.0.1:5000/add_dir", httpMethod = HttpPost, body = $body)
+  echo r.body
+
+
 proc list_samples() =
   let response = client.request("http://127.0.0.1:5000/list_samples")
   echo response.body
@@ -42,4 +51,4 @@ proc process_times() =
   echo response.body
 
 when isMainModule:
-  dispatchMulti([info], [add_sample], [neighbours], [list_samples], [process_times])
+  dispatchMulti([info], [add_sample], [add_samples_from_dir], [neighbours], [list_samples], [process_times])

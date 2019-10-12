@@ -1,0 +1,47 @@
+#? stdtmpl(subsChar = '$', metaChar = '#')
+#proc generateSamplePage(sample: JsonNode, neighbours: JsonNode): string =
+#  result = ""
+<html>
+<head>
+<style>
+body {
+max-width: 38rem;
+padding: 2rem;
+margin: auto;
+}
+ul {
+list-style: none;
+}
+</style>
+<body>
+<h1><a href="/">Catwalk</a></h1>
+<hr>
+<h2>Sample</h2>
+<h3>Information</h3>
+<ul>
+<li>Name: ${sample["name"].getStr()}</li>
+<li>Status: ${sample["status"].getStr()}</li>
+<li>Quality: ${sample["quality"].getInt()}</li>
+</ul>
+<h3>Neighbours</h3>
+#if len(neighbours) == 0:
+<p>This sample has no neighbours.</p>
+#else:
+#if len(neighbours) == 1:
+<p>This sample has one neighbour.</p>
+#else:
+<p>This sample has ${len(neighbours)} neighbours.</p>
+#end if
+<table style="border: 1px none; width: 75%;">
+#for neighbour in items(neighbours):
+#let name = neighbour[0].getStr()
+#let distance = neighbour[1].getStr().parseInt()
+<tr><td><a style="font-family: monospace" href="/sample/$name">$name</a></td><td>$distance</td></tr>
+#end for
+</table>
+#end if
+<br>
+<hr>
+<p>Developed by Denis Volk</p>
+</body>
+</html>

@@ -1,0 +1,46 @@
+#? stdtmpl(subsChar = '$', metaChar = '#')
+#proc generateFrontPage(info: JsonNode, samples: JsonNode, i: int, j: int): string =
+#  result = ""
+<html>
+  <head>
+    <style>
+      body {
+      max-width: 38rem;
+      padding: 2rem;
+      margin: auto;
+      }
+      ul {
+      list-style: none;
+      }
+    </style>
+  </head>
+  <body>
+    <h1><a href="/">Catwalk</a></h1>
+    <hr>
+    <h2>Front page</h2>
+    <h3>Information</h3>
+    <ul>
+    <li>Reference: ${info["reference_name"].getStr()}</li>
+    <li>Mask: ${info["mask_name"].getStr()}</li>
+    <li>Maximum distance: ${info["max_distance"]}</li>
+    <li>Samples: ${info["n_samples"]}</li>
+    <li>Neighbour entries: ${info["n_neighbour_entries"]}</li>
+    <li>Memory used: ${(info["occupied_mem"].getInt() / 1_000_000).int} mb</li>
+    </ul>
+    <h3>Samples ($i - $j)</h3>
+    <a href="/?i=${i-25}&j=$i">&lt; prev</a>
+    <a href="/?i=$j&j=${j+25}"> next &gt;</a>
+    <ul>
+    #var n = 0
+    <table style="width: 100%">
+    #for sample in items(samples):
+      #let name = sample["name"].getStr()
+      <tr><td>${n + i}</td><td><a style="font-family: monospace;" href="/sample/$name">$name</a></td></tr>
+      #inc n
+    #end for
+    </table>
+    </ul>
+  <hr>
+  <p><small>Developed by Denis Volk</small></p>
+  </body>
+</html>
