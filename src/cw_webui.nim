@@ -49,6 +49,3 @@ proc main(bind_host: string = "0.0.0.0", bind_port: int = 5001) =
 
 when isMainModule:
   dispatch(main)
-
-#client.headers = newHttpHeaders({ "Content-Type": "application/json" })
-#let response = client.request("http://127.0.0.1:5000/add_sample", httpMethod = HttpPost, body = $body)
