@@ -26,7 +26,7 @@ This creates three binaries: `cw_server`, `cw_client` and `cw_webui`
 
 ## Adding samples
 
-    ./cw_client add_samples_from_dir -s path/to/directory/of/fastas
+    ./cw_client add_samples_from_dir -s 'path/to/directory/of/fastas'
 
 ## Starting the web UI
 
@@ -55,6 +55,7 @@ A script that can take dumps from `cw_client process_times` and draw graphs like
 
 - persistence with database
 - more tests
+- sequence deduplication
 
 ## References
 
