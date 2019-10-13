@@ -26,7 +26,7 @@ This creates three binaries: `cw_server`, `cw_client` and `cw_webui`
 
 ## Adding samples
 
-    ./cw_client add_samples_from_dir -s 'path/to/directory/of/fastas'
+    ./cw_client add_samples_from_dir -s 'fasta_dir'
 
 ## Starting the web UI
 
