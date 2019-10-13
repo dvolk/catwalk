@@ -4,9 +4,7 @@
 
 CatWalk is a service where you insert bacterial fasta files and then query relationships between them.
 
-## Status
-
-*Experimental*
+It is based on the design of findNeighbour3 by David Wyllie.
 
 ## Requirements
 
@@ -16,42 +14,52 @@ CatWalk is a service where you insert bacterial fasta files and then query relat
 
     nimble build
 
-This creates two binaries: `cw_server` and `cw_client`
+This creates three binaries: `cw_server`, `cw_client` and `cw_webui`
 
-## Using cw_server
+## Starting cw_server (example)
 
-    ./cw_server
+    ./cw_server --instance-name=test \
+                --reference-name=test \
+                --reference-filepath=res/references/R00000039.fa \
+                --mask-name=TB-exclude-adaptive.txt \
+                --mask-filepath=res/masks/TB-exclude-adaptive.txt
 
-## Using cw_client
+## Adding samples
 
-    ./cw_client
-    Usage:
-      cw_client {SUBCMD}  [sub-command options & parameters]
-    where {SUBCMD} is one of:
-      help           print comprehensive or per-cmd help
-      info           
-      add_sample     
-      neighbours     
-      list_samples   
-      process_times  
+    ./cw_client add_samples_from_dir -s path/to/directory/of/fastas
 
-## Performance
+## Starting the web UI
 
-It's pretty good but if you want it even faster you can compile manually:
+    ./cw_webui
 
-    nim c -d:release -d:danger --opt:speed src/cw_server
-    nim c -d:release -d:danger --opt:speed src/cw_client
+Open browser at `http://localhost:5001`
+
+## Utils
+
+### utils/compile.bash
+
+Compile catwalk binaries with more aggressive optimization options.
+
+### utils/verify.py
+
+Given a reference, a mask file and two samples, check the difference between
+the samples in different ways.
+
+### utils/plot_array.py
+
+A script that can take dumps from `cw_client process_times` and draw graphs like so:
+
+![](https://gitea.mmmoxford.uk/dvolk/catwalk/raw/branch/master/doc/perf.png)
 
 ## TODO
 
-- Configuration/command-line arguments for cw_server
-- Better EW emulation
-- Web UI
-- Lower memory usage (current ~700kb/sample)
-- Faster performance
+- persistence with database
+- more tests
 
-## Misc
+## References
 
-`utils/plot_array.py` is a script that can take dumps from `cw_client process_times` and draw graphs like so:
+https://github.com/davidhwyllie/findNeighbour
 
-![](https://gitea.mmmoxford.uk/dvolk/catwalk/raw/branch/master/doc/perf.png)
+https://github.com/davidhwyllie/findNeighbour2
+
+https://github.com/davidhwyllie/findNeighbour3
