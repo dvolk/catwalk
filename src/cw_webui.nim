@@ -15,7 +15,7 @@ router app:
   get "/":
     var
       i = 0
-      j = 25
+      j = 15
     if request.params.contains("i"):
       i = request.params["i"].parseInt()
     if request.params.contains("j"):
@@ -25,8 +25,8 @@ router app:
       info = parseJson(r1.body)
     if i < 0:
       i = 0
-    if j < 25:
-      j = 25
+    if j < 15:
+      j = 15
     let
       r2 = client.request("http://127.0.0.1:5000/get_samples/" & $i & "/" & $j)
       samples = parseJson(r2.body)

@@ -19,9 +19,18 @@ list-style: none;
 <h2>Sample</h2>
 <h3>Information</h3>
 <ul>
+#let status = sample["status"].getStr()
 <li>Name: ${sample["name"].getStr()}</li>
-<li>Status: ${sample["status"].getStr()}</li>
+<li>Status: $status</li>
 <li>Quality: ${sample["quality"].getInt()}</li>
+#if status == "Ok":
+#let As = sample["compressed_sequence_counts"][0].getInt()
+#let Cs = sample["compressed_sequence_counts"][1].getInt()
+#let Gs = sample["compressed_sequence_counts"][2].getInt()
+#let Ts = sample["compressed_sequence_counts"][3].getInt()
+<li>SNV from reference: ${sample["ref_distance"].getInt()} <small>($As A, $Cs C, $Gs G, $Ts T)</small></li>
+#end if
+<li>N positions: ${sample["n_positions_len"].getInt()}</li>
 </ul>
 <h3>Neighbours</h3>
 #if len(neighbours) == 0:
@@ -42,6 +51,6 @@ list-style: none;
 #end if
 <br>
 <hr>
-<p>Developed by Denis Volk</p>
+<p><small>Developed by Denis Volk</small></p>
 </body>
 </html>

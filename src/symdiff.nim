@@ -3,7 +3,6 @@
 
 import intsets
 import times
-import sequtils
 
 proc sym_diff1*(xs: seq[int], ys: seq[int], buf: var IntSet, s1_n_positions: IntSet, s2_n_positions: IntSet, max_distance: int) =
   let

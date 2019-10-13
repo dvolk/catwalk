@@ -3,6 +3,7 @@ import tables
 import intsets
 import strutils
 import marshal
+import os
 
 import catwalk
 import fasta
@@ -17,7 +18,22 @@ template check_param(p: string) =
     resp "Missing parameter: " & p
 
 proc `%`(s: Sample): JsonNode =
-  %[("name", %s.name), ("status", %s.status), ("n_positions_len", %s.n_positions.len), ("quality", %s.quality)]
+  %[("name", %s.name), ("status", %s.status), ("n_positions_len", %s.n_positions.len), ("quality", %s.quality), ("compressed_sequence_counts", %compressed_sequence_counts(s.diffsets)), ("ref_distance", %s.ref_distance), ("n_positions_len", %s.n_positions.len)]
+
+proc add_samples_from_dir*(c: var CatWalk, samples_dir: string) =
+  var
+    samples: seq[Sample]
+  for kind, path in walkDir(samples_dir):
+    let
+      (sample_header, sample_seq) = parse_fasta_file(path)
+    var
+      xs = path.split('/')
+      xs_last = xs[xs.len - 1]
+      name = xs_last.replace(".fasta", "").replace(".fa", "")
+
+    samples.add(new_Sample(name, name, sample_seq))
+  # add samples to catwalk
+  c.add_samples(samples)
 
 router app:
   get "/info":
