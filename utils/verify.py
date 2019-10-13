@@ -1,20 +1,13 @@
+import unittest
 import argh
 
-def load_fasta(filepath):
-    return ''.join([x.strip() for x in open(filepath).readlines()][1:])
+def load_fasta(fasta_filecontent):
+    return ''.join([x.strip() for x in fasta_filecontent.split("\n") if x][1:])
 
-def load_mask(filepath):
-    return set([int(x.strip()) for x in open(filepath).readlines()])
+def load_mask(mask_filecontent):
+    return set([int(x.strip()) for x in mask_filecontent.split("\n") if x])
 
-def main(ref_filepath, mask_filepath, sample1_filepath, sample2_filepath):
-    ref = load_fasta(ref_filepath)
-    sam1 = load_fasta(sample1_filepath)
-    sam2 = load_fasta(sample2_filepath)
-    mask = load_mask(mask_filepath)
-
-    assert(len(ref) == len(sam1))
-    assert(len(ref) == len(sam2))
-
+def compare(ref, mask, sam1, sam2):
     changes_raw = 0
     changes_after_ref_ns = 0
     changes_after_ref_mask = 0
@@ -33,11 +26,60 @@ def main(ref_filepath, mask_filepath, sample1_filepath, sample2_filepath):
                     if sam1[i] in 'ACGT' and sam2[i] in 'ACGT':
                         changes_after_pair_ns = changes_after_pair_ns + 1
 
+    return changes_raw, changes_after_ref_ns, changes_after_ref_mask, changes_after_pair_ns
+
+def main(ref_filepath, mask_filepath, sample1_filepath, sample2_filepath):
+    ref = load_fasta(open(ref_filepath).read())
+    sam1 = load_fasta(open(sample1_filepath).read())
+    sam2 = load_fasta(open(sample2_filepath).read())
+    mask = load_mask(open(mask_filepath).read())
+
+    assert(len(ref) == len(sam1))
+    assert(len(ref) == len(sam2))
+
+    changes_raw, changes_after_ref_ns, changes_after_ref_mask, changes_after_pair_ns = compare(ref, mask, sam1, sam2)
+
     print(f"changes raw: {changes_raw}")
     print(f"changes after ref ns: {changes_after_ref_ns}")
     print(f"changes after ref mask: {changes_after_ref_mask}")
     print(f"changes after pair ns: {changes_after_pair_ns}")
-    
-    
+
+
 if __name__ == "__main__":
     argh.dispatch_command(main)
+
+
+class TestVerify(unittest.TestCase):
+    def test_load_fasta(self):
+        fasta = ">header\nACGT\nTGCA\n"
+        expected = "ACGTTGCA"
+        actual = load_fasta(fasta)
+        self.assertEqual(actual, expected)
+
+    def test_load_mask(self):
+        mask = "\n123\n234\n345\n"
+        expected = {123, 234, 345}
+        actual = load_mask(mask)
+        self.assertEqual(actual, expected)
+
+    def test_compare1(self):
+        ref = "ACGTTGCA"
+        mask = [0]
+        sam1 = "ACGTCGCA"
+        sam2 = "CCGTTGCA"
+        c1, c2, c3, c4 = compare(ref, mask, sam1, sam2)
+        self.assertEqual(c1, 2)
+        self.assertEqual(c2, 2)
+        self.assertEqual(c3, 1)
+        self.assertEqual(c4, 1)
+
+    def test_compare2(self):
+        ref = "ACGTTGCA"
+        mask = [0]
+        sam1 = "ACGTCGCA"
+        sam2 = "NCGTNGCA"
+        c1, c2, c3, c4 = compare(ref, mask, sam1, sam2)
+        self.assertEqual(c1, 2)
+        self.assertEqual(c2, 2)
+        self.assertEqual(c3, 1)
+        self.assertEqual(c4, 0)
