@@ -43,7 +43,7 @@
     <table style="margin-left: 1.5em; width: 100%">
     #for sample in items(samples):
       #let name = sample["name"].getStr()
-      <tr><td>${n + i}.</td><td><a style="font-family: monospace;" href="/sample/$name">$name</a></td></tr>
+      <tr><td><span style="font-size: 0.8em;">${n + i}.</span></td><td><a style="font-family: monospace;" href="/sample/$name">$name</a></td></tr>
       #inc n
     #end for
     </table>
