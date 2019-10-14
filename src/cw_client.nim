@@ -1,8 +1,6 @@
+import strutils
 import httpClient
 import json
-import random
-import times
-import strutils
 
 import cligen
 

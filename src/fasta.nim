@@ -1,5 +1,4 @@
 import memfiles
-import strutils
 
 proc parse_fasta_file*(filepath: string): (string, string) =
   var
