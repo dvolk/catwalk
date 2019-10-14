@@ -78,12 +78,12 @@ router app:
     if i < 0:
       i = 0
     if j >= len(c.samples):
-      j = len(c.samples) - 1
+      j = len(c.samples)
     var
       r: seq[JsonNode]
       n = 0
     for k in c.samples.keys:
-      if n > i and n <= j:
+      if n >= i and n <= j:
         r.add(%*c.samples[k])
       inc n
     resp %*(r)
@@ -105,7 +105,7 @@ router app:
 
     resp "Added " & js["name"].getStr()
 
-  post "/add_dir":
+  post "/add_samples_from_dir":
     let
       js = parseJson(request.body)
     check_param "samples_dir"
@@ -145,6 +145,7 @@ proc main(bind_host: string = "0.0.0.0",
     reference = new_Sample(reference_name, reference_filepath, refseq)
     mask = new_Mask(mask_name, readFile(mask_filepath))
 
+  echo mask.positions.len
   c = new_CatWalk(instance_name, reference, mask)
 
   var

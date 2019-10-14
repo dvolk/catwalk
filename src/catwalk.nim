@@ -74,7 +74,8 @@ proc add_position(cs: var CompressedSequence, base: char, position: int) {.inlin
     of 'A': 0
     of 'C': 1
     of 'G': 2
-    else:   3
+    of 'T': 3
+    else: 4
   cs[index].add(position)
 
 #
@@ -91,7 +92,7 @@ proc new_Sample*(fasta_filepath: string, header: string, sequence: string) : Sam
   return s
 
 proc is_n_position(c: char): bool {.inline.} =
-  c == 'N' or c == '-'
+  c != 'A' and c != 'C' and c != 'G' and c != 'T'
 
 proc reference_compress(sample: var Sample, reference: Sample, mask: Mask, max_n_positions: int, min_quality: int) =
   if sample.sequence.len != reference.sequence.len:
@@ -101,14 +102,12 @@ proc reference_compress(sample: var Sample, reference: Sample, mask: Mask, max_n
   empty_compressed_sequence(sample.diffsets)
 
   for i in 0..reference.sequence.high:
-    if sample.sequence[i] != reference.sequence[i]:
-      if not is_n_position(sample.sequence[i]) and not is_n_position(reference.sequence[i]):
-        if not mask.positions.contains(i):
-          sample.diffsets.add_position(sample.sequence[i], i)
-    if is_n_position(sample.sequence[i]):
-      sample.n_positions.incl(i)
+    if sample.sequence[i] != reference.sequence[i] and not mask.positions.contains(i):
+      if is_n_position(sample.sequence[i]):
+        sample.n_positions.incl(i)
+      else:
+        sample.diffsets.add_position(sample.sequence[i], i)
 
-  sample.n_positions.assign(sample.n_positions.difference(mask.positions))
   sample.sequence = ""
   sample.ref_distance = ref_snp_distance(sample.diffsets)
 
@@ -116,7 +115,7 @@ proc reference_compress(sample: var Sample, reference: Sample, mask: Mask, max_n
     let
       n = sample.n_positions.len.float
       r = reference.sequence.high.float
-    sample.quality = (100 * (r - n) / r).int
+    sample.quality = (100 * ((r - n) / r)).int
   else:
     sample.quality = 100
 
@@ -133,12 +132,11 @@ proc reference_compress(sample: var Sample, reference: Sample, mask: Mask, max_n
 
 proc new_Mask*(mask_name: string, mask_str: string): Mask =
   result.name = mask_name
-  for line in mask_str.split('\n'):
-    if line != "" and line != " ":
-      try:
-        result.positions.incl(parseInt(line))
-      except:
-        echo "Not an integer: '" & line & "'"
+  for line in mask_str.splitLines():
+    try:
+      result.positions.incl(parseInt(line))
+    except ValueError:
+      echo "Not an integer: '" & line & "'"
 
 #
 # CatWalk
@@ -150,7 +148,7 @@ proc new_CatWalk*(name: string, reference: Sample, mask: Mask) : CatWalk =
   c.reference = reference
   c.mask = mask
   c.settings.max_distance = 20
-  c.settings.max_n_positions = 1000000
+  c.settings.max_n_positions = 130000
   c.settings.min_quality = 80
   return c
 

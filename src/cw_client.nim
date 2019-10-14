@@ -34,7 +34,7 @@ proc add_samples_from_dir(samples_dir: string) =
   }
 
   client.headers = newHttpHeaders({ "Content-Type": "application/json" })
-  let r = client.request("http://127.0.0.1:5000/add_dir", httpMethod = HttpPost, body = $body)
+  let r = client.request("http://127.0.0.1:5000/add_samples_from_dir", httpMethod = HttpPost, body = $body)
   echo r.body
 
 
