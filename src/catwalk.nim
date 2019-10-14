@@ -206,10 +206,6 @@ when isMainModule:
 
   s = @[s1, s2, s5, s3, s4]
   c.add_samples(s)
+  assert $c.neighbours == """{("s4", "s3"): 3, ("s4", "s1"): 1, ("s3", "s2"): 2, ("s3", "s4"): 3, ("s3", "s1"): 4, ("s1", "s4"): 1, ("s4", "s2"): 4, ("s2", "s1"): 4, ("s1", "s3"): 4, ("s1", "s2"): 4, ("s2", "s3"): 2, ("s2", "s4"): 4}"""
 
-  echo reference
-  for s in c.samples.values:
-    echo s
-  echo c.neighbours
-
-  assert $c.neighbours == "{(\"s4\", \"s3\"): 3, (\"s4\", \"s1\"): 1, (\"s3\", \"s2\"): 3, (\"s3\", \"s4\"): 3, (\"s3\", \"s1\"): 4, (\"s1\", \"s4\"): 1, (\"s4\", \"s2\"): 4, (\"s2\", \"s1\"): 4, (\"s1\", \"s3\"): 4, (\"s1\", \"s2\"): 4, (\"s2\", \"s3\"): 3, (\"s2\", \"s4\"): 4}"
+  echo "Tests passed."
