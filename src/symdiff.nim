@@ -55,34 +55,151 @@ proc sum_sym_diff1*(xs0, xs1, xs2, xs3, xs4, xs5, xs6, xs7: seq[int], s1_n_posit
 
 when isMainModule:
   var
-    is1 = initIntSet()
-    is2 = initIntSet()
-    buf = initIntSet()
+    is1: IntSet
+    is2: IntSet
+    buf: IntSet
     xs1: seq[int]
     xs2: seq[int]
 
   # bug1
+  is1 = initIntSet()
+  is2 = initIntSet()
+  buf = initIntSet()
   xs1 = @[]
   xs2 = @[1, 2, 3]
-  sym_diff2(xs1, xs2, buf, is1, is2, 20)
-  echo len(xs1)
-  echo len(xs2)
-  echo xs1
-  echo '\n'
-  echo xs2
-  echo '\n'
-  echo buf
+  sym_diff1(xs1, xs2, buf, is1, is2, 20)
+  assert $buf == "{1, 2, 3}"
 
-  #for x in 0..100_000:
-  #  xs1.add(x)
-  #  xs2.add(x)
-  #  xs3.add(x)
-  #  xs4.add(x)
-  #  xs5.add(x)
-  #  xs6.add(x)
-  #  xs7.add(x * 3)
-  #  xs8.add(x * 4)
-  #
-  #for _ in 0..10:
-  #  l = sum_sym_diff1(xs1, xs2, xs3, xs4, xs5, xs6, xs7, xs8, is1, is2, 20)
-  #assert l == 21
+  is1 = initIntSet()
+  is2 = initIntSet()
+  buf = initIntSet()
+  xs1 = @[1, 2, 3]
+  xs2 = @[]
+  sym_diff1(xs1, xs2, buf, is1, is2, 20)
+  assert $buf == "{1, 2, 3}"
+
+  is1 = initIntSet()
+  is2 = initIntSet()
+  buf = initIntSet()
+  xs1 = @[1, 2, 3]
+  xs2 = @[1, 2, 3]
+  sym_diff1(xs1, xs2, buf, is1, is2, 20)
+  assert $buf == "{}"
+
+  is1 = initIntSet()
+  is2 = initIntSet()
+  buf = initIntSet()
+  xs1 = @[1, 2]
+  xs2 = @[1, 2, 3]
+  sym_diff1(xs1, xs2, buf, is1, is2, 20)
+  assert $buf == "{3}"
+
+  is1 = initIntSet()
+  is2 = initIntSet()
+  buf = initIntSet()
+  xs1 = @[1, 2, 3]
+  xs2 = @[2, 3]
+  sym_diff1(xs1, xs2, buf, is1, is2, 20)
+  assert $buf == "{1}"
+
+  is1 = initIntSet()
+  is2 = initIntSet()
+  buf = initIntSet()
+  xs1 = @[1, 2, 3, 4]
+  xs2 = @[2, 3]
+  sym_diff1(xs1, xs2, buf, is1, is2, 20)
+  assert $buf == "{1, 4}"
+
+  is1 = initIntSet()
+  is2 = initIntSet()
+  buf = initIntSet()
+  xs1 = @[2, 3]
+  xs2 = @[1, 2, 3, 4]
+  sym_diff1(xs1, xs2, buf, is1, is2, 20)
+  assert $buf == "{1, 4}"
+
+  is1 = initIntSet()
+  is2 = initIntSet()
+  buf = initIntSet()
+  xs1 = @[]
+  xs2 = @[]
+  sym_diff1(xs1, xs2, buf, is1, is2, 20)
+  assert $buf == "{}"
+
+  is1 = initIntSet()
+  is2 = initIntSet()
+  is2.incl(1)
+  buf = initIntSet()
+  xs1 = @[1, 2, 3]
+  xs2 = @[]
+  sym_diff1(xs1, xs2, buf, is1, is2, 20)
+  assert $buf == "{2, 3}"
+
+  is1 = initIntSet()
+  is2 = initIntSet()
+  is1.incl(1)
+  buf = initIntSet()
+  xs1 = @[]
+  xs2 = @[1, 2, 3]
+  sym_diff1(xs1, xs2, buf, is1, is2, 20)
+  assert $buf == "{2, 3}"
+
+  is1 = initIntSet()
+  is2 = initIntSet()
+  is1.incl(1)
+  buf = initIntSet()
+  xs1 = @[3, 4]
+  xs2 = @[1, 2, 3]
+  sym_diff1(xs1, xs2, buf, is1, is2, 20)
+  assert $buf == "{2, 4}"
+
+  is1 = initIntSet()
+  is2 = initIntSet()
+  is2.incl(1)
+  buf = initIntSet()
+  xs1 = @[1, 2, 3]
+  xs2 = @[3, 4]
+  sym_diff1(xs1, xs2, buf, is1, is2, 20)
+  assert $buf == "{2, 4}"
+
+  is1 = initIntSet()
+  is2 = initIntSet()
+  is2.incl(1)
+  is2.incl(2)
+  is2.incl(3)
+  is1.incl(4)
+  is1.incl(5)
+  is1.incl(6)
+  buf = initIntSet()
+  xs1 = @[1, 2, 3]
+  xs2 = @[4, 5, 6]
+  sym_diff1(xs1, xs2, buf, is1, is2, 20)
+  assert $buf == "{}"
+
+  is1 = initIntSet()
+  is2 = initIntSet()
+  is2.incl(1)
+  is2.incl(2)
+  is1.incl(5)
+  is1.incl(6)
+  buf = initIntSet()
+  xs1 = @[1, 2, 3]
+  xs2 = @[4, 5, 6]
+  sym_diff1(xs1, xs2, buf, is1, is2, 20)
+  assert $buf == "{3, 4}"
+
+  is1 = initIntSet()
+  is2 = initIntSet()
+  is2.incl(1)
+  is2.incl(2)
+  is1.incl(5)
+  is1.incl(6)
+  buf = initIntSet()
+  buf.incl(0)
+  buf.incl(10)
+  xs1 = @[1, 2, 3]
+  xs2 = @[4, 5, 6]
+  sym_diff1(xs1, xs2, buf, is1, is2, 20)
+  assert $buf == "{0, 10, 3, 4}"
+
+  echo "Tests passed."
