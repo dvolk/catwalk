@@ -2,62 +2,62 @@
 #proc generateSamplePage(sample: JsonNode, neighbours: JsonNode): string =
 #  result = ""
 <html>
-<head>
-<style>
-body {
-max-width: 38rem;
-padding: 2rem;
-margin: auto;
-font-family: sans-serif;
-font-size: 0.8em;
-color: rgba(0,0,0,0.87)
-}
-a {
-text-decoration: none;
-color: steelblue;
-}
-ul {
-list-style: none;
-}
-</style>
-<body>
-<h1><a href="/">Catwalk</a></h1>
-<hr>
-<h2>Sample</h2>
-<h3>Information</h3>
-<ul>
+  <head>
+    <style>
+      body {
+      max-width: 38rem;
+      padding: 2rem;
+      margin: auto;
+      font-family: sans-serif;
+      font-size: 0.8em;
+      color: rgba(0,0,0,0.87)
+      }
+      a {
+      text-decoration: none;
+      color: steelblue;
+      }
+      ul {
+      list-style: none;
+      }
+    </style>
+    <body>
+      <h1><a href="/">Catwalk</a></h1>
+      <hr>
+      <h2>Sample</h2>
+      <h3>Information</h3>
+      <ul>
 #let status = sample["status"].getStr()
-<li>Name: ${sample["name"].getStr()}</li>
-<li>Status: $status</li>
-<li>Quality: ${sample["quality"].getInt()}</li>
+	<li>Name: ${sample["name"].getStr()}</li>
+	<li>Status: $status</li>
+	<li>Quality: ${sample["quality"].getInt()}</li>
 #if status == "Ok":
 #let As = sample["compressed_sequence_counts"][0].getInt()
 #let Cs = sample["compressed_sequence_counts"][1].getInt()
 #let Gs = sample["compressed_sequence_counts"][2].getInt()
 #let Ts = sample["compressed_sequence_counts"][3].getInt()
-<li>SNV from reference: ${sample["ref_distance"].getInt()} <small>($As A, $Cs C, $Gs G, $Ts T)</small></li>
+	<li>SNV from reference: ${sample["ref_distance"].getInt()} <small>($As A, $Cs C, $Gs G, $Ts T)</small></li>
 #end if
-<li>N positions: ${sample["n_positions_len"].getInt()}</li>
-</ul>
-<h3>Neighbours</h3>
+	<li>N positions: ${sample["n_positions_len"].getInt()}</li>
+      </ul>
+      <h3>Neighbours</h3>
 #if len(neighbours) == 0:
-<p>This sample has no neighbours.</p>
+      <p>This sample has no neighbours.</p>
 #else:
 #if len(neighbours) == 1:
-<p>This sample has one neighbour.</p>
+      <p>This sample has one neighbour.</p>
 #else:
-<p>This sample has ${len(neighbours)} neighbours.</p>
+      <p>This sample has ${len(neighbours)} neighbours.</p>
 #end if
-<table style="border: 1px none; width: 75%;">
+      <table style="border: 1px none; width: 75%;">
 #for neighbour in items(neighbours):
 #let name = neighbour[0].getStr()
 #let distance = neighbour[1].getStr().parseInt()
-<tr><td><a style="font-family: monospace" href="/sample/$name">$name</a></td><td>$distance</td></tr>
+	<tr><td><a style="font-family: monospace" href="/sample/$name">$name</a></td><td>$distance</td></tr>
 #end for
-</table>
+      </table>
 #end if
-<br>
-<hr>
-<p><small>Developed by Denis Volk</small></p>
-</body>
+      <br>
+      <hr>
+      <p><small>Developed by Denis Volk</small></p>
+    </body>
 </html>

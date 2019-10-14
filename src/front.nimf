@@ -1,6 +1,6 @@
 #? stdtmpl(subsChar = '$', metaChar = '#')
 #proc generateFrontPage(info: JsonNode, samples: JsonNode, i: int, j: int): string =
-#  result = ""
+# result = ""
 <html>
   <head>
     <style>
@@ -27,28 +27,28 @@
     <h2>Front page</h2>
     <h3>Information</h3>
     <ul>
-    <li>Name: ${info["name"].getStr()}</li>
-    <li>Reference: ${info["reference_name"].getStr()}</li>
-    <li>Mask: ${info["mask_name"].getStr()}</li>
-    <li>Maximum distance: ${info["max_distance"]}</li>
-    <li>Samples: ${info["n_samples"]}</li>
-    <li>Neighbour entries: ${info["n_neighbour_entries"]}</li>
-    <li>Memory used: ${(info["occupied_mem"].getInt() / 1_000_000).int} mb</li>
+      <li>Name: ${info["name"].getStr()}</li>
+      <li>Reference: ${info["reference_name"].getStr()}</li>
+      <li>Mask: ${info["mask_name"].getStr()}</li>
+      <li>Maximum distance: ${info["max_distance"]}</li>
+      <li>Samples: ${info["n_samples"]}</li>
+      <li>Neighbour entries: ${info["n_neighbour_entries"]}</li>
+      <li>Memory used: ${(info["occupied_mem"].getInt() / 1_000_000).int} mb</li>
     </ul>
     <h3>Samples ($i - $j)</h3>
     <a href="/?i=${i-15}&j=$i">&lt; prev</a>
     <a href="/?i=$j&j=${j+15}"> next &gt;</a>
     <br><br>
-    #var n = 0
+#var n = 0
     <table style="margin-left: 1.5em; width: 100%">
-    #for sample in items(samples):
-      #let name = sample["name"].getStr()
+#for sample in items(samples):
+#let name = sample["name"].getStr()
       <tr><td><span style="font-size: 0.8em;">${n + i}.</span></td><td><a style="font-family: monospace;" href="/sample/$name">$name</a></td></tr>
-      #inc n
-    #end for
+#inc n
+#end for
     </table>
-  <br>
-  <hr>
-  <p><small>Developed by Denis Volk</small></p>
+    <br>
+    <hr>
+    <p><small>Developed by Denis Volk</small></p>
   </body>
 </html>
