@@ -23,40 +23,11 @@ def load_mask(mask_filecontent):
     return mask
 
 def compare(ref, mask, sam1, sam2):
-    print(ref[4359827], sam1[4359827], sam2[4359827])
     changes_raw = 0
     changes_after_ref_ns = 0
     changes_after_ref_mask = 0
     changes_after_pair_ns = 0
 
-    sam1_change_from_ref = 0
-    sam1_ns = 0
-    sam1_ns_after_mask = 0
-    for i, _ in enumerate(ref):
-        if sam1[i] not in 'ACGT':
-            sam1_ns = sam1_ns + 1
-            if i not in mask:
-                sam1_ns_after_mask = sam1_ns_after_mask + 1
-        if sam1[i] != ref[i] and sam1[i] in 'ACGT':
-            if i not in mask:
-                sam1_change_from_ref = sam1_change_from_ref + 1
-
-    sam2_change_from_ref = 0
-    sam2_ns = 0
-    sam2_ns_after_mask = 0
-    for i, _ in enumerate(ref):
-        if sam2[i] not in 'ACGT':
-            sam2_ns = sam2_ns + 1
-            if i not in mask:
-                sam2_ns_after_mask = sam2_ns_after_mask + 1
-        if sam2[i] != ref[i] and sam2[i] in 'ACGT':
-            if i not in mask:
-                sam2_change_from_ref = sam2_change_from_ref + 1
-
-    print("changes from ref", sam1_change_from_ref, sam2_change_from_ref)
-    print("sample ns", sam1_ns, sam2_ns)
-    print("ns after mask", sam1_ns_after_mask, sam2_ns_after_mask)
-                
     for i, _ in enumerate(ref):
         if sam1[i] != sam2[i]:
             changes_raw = changes_raw + 1
@@ -68,7 +39,6 @@ def compare(ref, mask, sam1, sam2):
                     changes_after_ref_mask = changes_after_ref_mask + 1
 
                     if sam1[i] in 'ACGT' and sam2[i] in 'ACGT':
-                        print(i, ref[i], sam1[i], sam2[i], i in mask)
                         changes_after_pair_ns = changes_after_pair_ns + 1
 
     return changes_raw, changes_after_ref_ns, changes_after_ref_mask, changes_after_pair_ns
