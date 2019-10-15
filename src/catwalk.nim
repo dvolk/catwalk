@@ -19,7 +19,6 @@ type
 
   Sample* = tuple
     name: string
-    filepath: string
     sequence: Sequence
     status: SampleStatus
     diffsets: CompressedSequence
@@ -41,8 +40,9 @@ type
     name: string
     reference: Sample
     mask: Mask
-    samples: Table[string, Sample]
-    neighbours: Table[(string, string), int]
+    samples: seq[Sample]
+    sample_indexes: Table[string, int]
+    neighbours: Table[int, seq[(int, int)]]
     process_times: seq[float]
 
 #
@@ -82,11 +82,10 @@ proc add_position(cs: var CompressedSequence, base: char, position: int) {.inlin
 # Sample
 #
 
-proc new_Sample*(fasta_filepath: string, header: string, sequence: string) : Sample =
+proc new_Sample*(fasta_filepath: string, sequence: string) : Sample =
   var s: Sample
-  s.name = header
+  s.name = fasta_filepath
   s.sequence = sequence
-  s.filepath = fasta_filepath
   s.n_positions = initIntSet()
   s.status = Unknown
   return s
@@ -152,51 +151,60 @@ proc new_CatWalk*(name: string, reference: Sample, mask: Mask) : CatWalk =
   c.settings.min_quality = 80
   return c
 
-proc process_neighbours(c: var CatWalk, sample1: Sample) =
+proc process_neighbours(c: var CatWalk, sample1_index: int) =
+  let
+    sample1 = c.samples[sample1_index]
   if sample1.status != Ok:
     return
-  for k in c.samples.keys:
-    if k == sample1.name:
-      continue
-    if c.neighbours.contains((sample1.name, k)) or c.neighbours.contains((k, sample1.name)):
-      continue
-    if c.samples[k].status != Ok:
+  for sample2_index in 0..c.samples.high:
+    if sample2_index == sample1_index:
       continue
     let
-      sample2 = c.samples[k]
+      sample2 = c.samples[sample2_index]
+    if sample2.status != Ok:
+      continue
+    #if c.neighbours.contains((sample1.name, k)) or c.neighbours.contains((k, sample1.name)):
+    #  continue
+    let
       d = count_diff2(sample1.diffsets, sample2.diffsets, sample1.n_positions, sample2.n_positions, c.settings.max_distance)
     if d <= c.settings.max_distance:
-      c.neighbours[(k, sample1.name)] = d
-      c.neighbours[(sample1.name, k)] = d
+      if not c.neighbours.contains(sample1_index):
+        c.neighbours[sample1_index] = newSeqOfCap[(int, int)](16)
+      c.neighbours[sample1_index].add((sample2_index, d))
+      if not c.neighbours.contains(sample2_index):
+        c.neighbours[sample2_index] = newSeqOfCap[(int, int)](16)
+      c.neighbours[sample2_index].add((sample1_index, d))
 
 proc add_samples*(c: var CatWalk, samples: var seq[Sample]) =
   for sample in samples.mitems():
     sample.reference_compress(c.reference, c.mask, c.settings.max_n_positions, c.settings.min_quality)
-    c.samples[sample.name] = sample
+    c.samples.add(sample)
+    c.sample_indexes[sample.name] = len(c.samples) - 1
 
   for sample in samples.mitems():
     let time1 = cpuTime()
-    c.process_neighbours(sample)
+    c.process_neighbours(c.sample_indexes[sample.name])
     c.process_times.add(cpuTime() - time1)
 
-proc get_neighbours*(c: CatWalk, sample_name: string, distance: int = 50) : seq[(string, int)] =
+proc get_neighbours*(c: CatWalk, sample_name: string, distance: int = 20) : seq[(string, int)] =
   result = @[]
-  for (s1, s2) in c.neighbours.keys:
-    if s1 == sample_name:
-      result.add((s2, c.neighbours[(s1, s2)]))
+  let sample_index = c.sample_indexes[sample_name]
+  if sample_index in c.neighbours:
+    for (neighbour_index, distance) in c.neighbours[sample_index]:
+      result.add((c.samples[neighbour_index].name, distance))
 
 #
 # test
 #
 when isMainModule:
   let
-    reference = new_Sample("re", "re", "AAACGT")
+    reference = new_Sample("re", "AAACGT")
     mask =      new_Mask("test", "0")
-    s1 =        new_Sample("s1", "s1", "AAACGG")
-    s2 =        new_Sample("s2", "s2", "-ATTTT")
-    s3 =        new_Sample("s3", "s3", "CATTCC")
-    s4 =        new_Sample("s4", "s4", "NAACGC")
-    s5 =        new_Sample("s5", "s5", "NNNNGC")
+    s1 =        new_Sample("s1", "AAACGG")
+    s2 =        new_Sample("s2", "-ATTTT")
+    s3 =        new_Sample("s3", "CATTCC")
+    s4 =        new_Sample("s4", "NAACGC")
+    s5 =        new_Sample("s5", "NNNNGC")
   var
     c = new_CatWalk("test", reference, mask)
     s: seq[Sample]
@@ -206,6 +214,7 @@ when isMainModule:
 
   s = @[s1, s2, s5, s3, s4]
   c.add_samples(s)
-  assert $c.neighbours == """{("s4", "s3"): 3, ("s4", "s1"): 1, ("s3", "s2"): 2, ("s3", "s4"): 3, ("s3", "s1"): 4, ("s1", "s4"): 1, ("s4", "s2"): 4, ("s2", "s1"): 4, ("s1", "s3"): 4, ("s1", "s2"): 4, ("s2", "s3"): 2, ("s2", "s4"): 4}"""
+
+  assert $c.neighbours == """{1: @[(0, 4), (0, 4), (3, 2), (4, 4), (3, 2), (4, 4)], 3: @[(0, 4), (1, 2), (0, 4), (1, 2), (4, 3), (4, 3)], 4: @[(0, 1), (1, 4), (3, 3), (0, 1), (1, 4), (3, 3)], 0: @[(1, 4), (3, 4), (4, 1), (1, 4), (3, 4), (4, 1)]}"""
 
   echo "Tests passed."

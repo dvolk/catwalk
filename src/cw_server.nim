@@ -31,7 +31,7 @@ proc add_samples_from_dir*(c: var CatWalk, samples_dir: string) =
       xs_last = xs[xs.len - 1]
       name = xs_last.replace(".fasta", "").replace(".fa", "")
 
-    samples.add(new_Sample(name, name, sample_seq))
+    samples.add(new_Sample(name, sample_seq))
   # add samples to catwalk
   c.add_samples(samples)
 
@@ -64,12 +64,12 @@ router app:
   get "/list_samples":
     var
       ret: string
-    for s in c.samples.values:
+    for s in c.samples:
       ret = ret & $[s.name, $s.status, $s.n_positions.len] & "\n"
     resp %*c.samples
 
   get "/get_sample/@name":
-    resp %*(c.samples[@"name"])
+    resp %*(c.samples[c.sample_indexes[@"name"]])
 
   get "/get_samples/@from/@to":
     var
@@ -82,10 +82,8 @@ router app:
     var
       r: seq[JsonNode]
       n = 0
-    for k in c.samples.keys:
-      if n >= i and n <= j:
-        r.add(%*c.samples[k])
-      inc n
+    for s in c.samples[i..<j]:
+      r.add(%*s)
     resp %*(r)
 
   post "/add_sample":
@@ -95,11 +93,11 @@ router app:
     check_param "name"
     check_param "sequence"
 
-    if c.samples.contains($js["name"]):
+    if c.sample_indexes.contains($js["name"]):
       resp "Sample " & js["name"].getStr() & " already exists"
 
     var
-      s = new_Sample(js["name"].getStr(), js["name"].getStr(), js["sequence"].getStr())
+      s = new_Sample(js["name"].getStr(), js["sequence"].getStr())
       xs = @[s]
     c.add_samples(xs)
 
@@ -130,8 +128,8 @@ router app:
     writeFile("neighbours.dat", $$c.neighbours)
 
   get "/load":
-    c.samples = to[Table[string, Sample]](readFile("samples.dat"))
-    c.neighbours = to[Table[(string, string), int]](readFile("neighbours.dat"))
+    c.samples = to[seq[Sample]](readFile("samples.dat"))
+    c.neighbours = to[Table[int, seq[(int, int)]]](readFile("neighbours.dat"))
 
 proc main(bind_host: string = "0.0.0.0",
           bind_port: int = 5000,
@@ -142,7 +140,7 @@ proc main(bind_host: string = "0.0.0.0",
           mask_filepath: string) =
   let
     (_, refseq) = parse_fasta_file(reference_filepath)
-    reference = new_Sample(reference_name, reference_filepath, refseq)
+    reference = new_Sample(reference_filepath, refseq)
     mask = new_Mask(mask_name, readFile(mask_filepath))
 
   echo mask.positions.len
