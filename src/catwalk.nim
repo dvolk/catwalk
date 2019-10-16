@@ -2,6 +2,7 @@ import tables
 import intsets
 import strutils
 import times
+import md5
 
 import symdiff
 
@@ -41,6 +42,7 @@ type
     reference: Sample
     mask: Mask
     samples: seq[Sample]
+    sample_md5s: Table[MD5Digest, int]
     sample_indexes: Table[string, int]
     neighbours: Table[int, seq[(int, int)]]
     process_times: seq[float]
@@ -177,10 +179,16 @@ proc process_neighbours(c: var CatWalk, sample1_index: int) =
 
 proc add_samples*(c: var CatWalk, samples: var seq[Sample]) =
   for sample in samples.mitems():
+    let
+      seq_md5 = toMD5(sample.sequence)
     sample.reference_compress(c.reference, c.mask, c.settings.max_n_positions, c.settings.min_quality)
-    c.samples.add(sample)
-    c.sample_indexes[sample.name] = len(c.samples) - 1
-
+    if not c.sample_md5s.contains(seq_md5):
+      c.samples.add(sample)
+      c.sample_indexes[sample.name] = len(c.samples) - 1
+      c.sample_md5s[seq_md5] = len(c.samples) - 1
+    else:
+      c.sample_indexes[sample.name] = c.sample_md5s[seq_md5]
+      echo "Found duplicate sample: " & sample.name & " " & c.samples[c.sample_indexes[sample.name]].name
   for sample in samples.mitems():
     let time1 = cpuTime()
     c.process_neighbours(c.sample_indexes[sample.name])
@@ -205,6 +213,7 @@ when isMainModule:
     s3 =        new_Sample("s3", "CATTCC")
     s4 =        new_Sample("s4", "NAACGC")
     s5 =        new_Sample("s5", "NNNNGC")
+    s6 =        new_Sample("s6", "NNNNGC")
   var
     c = new_CatWalk("test", reference, mask)
     s: seq[Sample]
@@ -212,7 +221,7 @@ when isMainModule:
   c.settings.max_distance = 20
   c.settings.max_n_positions = 2
 
-  s = @[s1, s2, s5, s3, s4]
+  s = @[s1, s2, s3, s4, s5, s6]
   c.add_samples(s)
 
   assert $c.neighbours == """{1: @[(0, 4), (0, 4), (3, 2), (4, 4), (3, 2), (4, 4)], 3: @[(0, 4), (1, 2), (0, 4), (1, 2), (4, 3), (4, 3)], 4: @[(0, 1), (1, 4), (3, 3), (0, 1), (1, 4), (3, 3)], 0: @[(1, 4), (3, 4), (4, 1), (1, 4), (3, 4), (4, 1)]}"""
