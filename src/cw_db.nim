@@ -40,19 +40,19 @@ proc get_queue*(): seq[QueueElem] =
     q.status = x[3]
     result.add(q)
 
-proc get_queue_top*(): Option[QueueElem] =
-  let row = db.getRow(sql"select name, filepath, sequence, status from queue limit 1")
-  if row[0] != "":
-    return some((row[0], row[1], row[2], row[3]))
-
 proc update_neighbours*(sample_name, neighbours: string) =
   db.exec(sql"""insert or replace into neighbours values (?, ?)""", sample_name, neighbours)
 
 proc get_sample*(name: string) =
   db.exec(sql"""select name, status, diffsets, n_positions from samples where name = ?""", name)
 
-proc get_samples*() =
-  db.exec(sql"""select name, status, diffsets, n_positions from samples""")
+iterator all_samples*(): InstantRow =
+  for x in cw_db.db.instantRows(sql"select name, status, diffsets, n_positions from samples"):
+    yield x
+
+iterator all_neighbours*(): InstantRow =
+  for x in cw_db.db.instantRows(sql"select name, status, diffsets, n_positions from samples"):
+    yield x
 
 proc add_sample*(name, status, diffsets, n_positions: string) =
   db.exec(sql"""insert into samples (name, status, diffsets, n_positions) values (?, ?, ?, ?)""", name, status, diffsets, n_positions)

@@ -16,7 +16,7 @@ import cw_db
 var c: CatWalk
 
 proc load_samples(): seq[Sample] =
-  for x in cw_db.db.instantRows(sql"select name, status, diffsets, n_positions from samples"):
+  for x in cw_db.all_samples():
     var
       s: Sample
     s.name = x[0]
@@ -27,7 +27,7 @@ proc load_samples(): seq[Sample] =
 
 proc load_neighbours(): Table[int, seq[(int, int)]] =
   var i = 0
-  for x in cw_db.db.instantRows(sql"select sample_name, neighbours from neighbours"):
+  for x in cw_db.all_neighbours():
     let
       neighbours = to[seq[(int, int)]](x[1])
     result[i] = @[]
@@ -73,7 +73,7 @@ proc main(bind_host: string = "0.0.0.0",
   var
     queue: seq[QueueElem]
   while true:
-    let queue = cw_db.get_queue()
+    queue = cw_db.get_queue()
     if queue.len > 0:
       var
         samples = newSeqOfCap[Sample](queue.len)
