@@ -3,7 +3,7 @@
 
 import intsets
 
-proc sym_diff1*(xs: seq[int], ys: seq[int], buf: var IntSet, s1_n_positions: IntSet, s2_n_positions: IntSet, max_distance: int) =
+proc sym_diff1*(xs: seq[int], ys: seq[int], buf: var seq[int], s1_n_positions: IntSet, s2_n_positions: IntSet, max_distance: int) =
   let
     last1 = len(xs)
     last2 = len(ys)
@@ -15,34 +15,42 @@ proc sym_diff1*(xs: seq[int], ys: seq[int], buf: var IntSet, s1_n_positions: Int
     if first2 == last2:
       for j in first1..last1-1:
         if not s2_n_positions.contains(xs[j]):
-          buf.incl(xs[j])
-          if buf.len > max_distance:
-            return
+          if not buf.contains(xs[j]):
+            buf.add(xs[j])
+            if buf.len > max_distance:
+              return
       return
     if xs[first1] < ys[first2]:
       if not s2_n_positions.contains(xs[first1]):
-        buf.incl(xs[first1])
-        if buf.len > max_distance:
-          return
+        if not buf.contains(xs[first1]):
+          buf.add(xs[first1])
+          if buf.len > max_distance:
+            return
       inc first1
     else:
       if ys[first2] < xs[first1]:
         if not s1_n_positions.contains(ys[first2]):
-          buf.incl(ys[first2])
-          if buf.len > max_distance:
-            return
+          if not buf.contains(ys[first2]):
+            buf.add(ys[first2])
+            if buf.len > max_distance:
+              return
       else:
         inc first1
       inc first2
   for j in first2..last2-1:
     if not s1_n_positions.contains(ys[j]):
-      buf.incl(ys[j])
-      if buf.len > max_distance:
-        return
+      if not buf.contains(ys[j]):
+        buf.add(ys[j])
+        if buf.len > max_distance:
+          return
 
+var
+  buf2 = newSeqOfCap[int](64)
 proc sum_sym_diff1*(xs0, xs1, xs2, xs3, xs4, xs5, xs6, xs7: seq[int], s1_n_positions: IntSet, s2_n_positions: IntSet, max_dist: int) : int =
-  var
-    buf2 = initIntSet()
+  if abs(xs0.len - xs1.len) > max_dist or abs(xs2.len - xs3.len) > max_dist or
+     abs(xs4.len - xs5.len) > max_dist or abs(xs6.len - xs7.len) > max_dist:
+    return max_dist + 1
+  buf2.setlen(0)
   symdiff1(xs0, xs1, buf2, s1_n_positions, s2_n_positions, max_dist)
   if buf2.len > max_dist: return max_dist + 1
   symdiff1(xs2, xs3, buf2, s1_n_positions, s2_n_positions, max_dist)
@@ -56,22 +64,22 @@ when isMainModule:
   var
     is1: IntSet
     is2: IntSet
-    buf: IntSet
+    buf: seq[int]
     xs1: seq[int]
     xs2: seq[int]
 
   # bug1
   is1 = initIntSet()
   is2 = initIntSet()
-  buf = initIntSet()
+  buf = newSeqOfCap[int](64)
   xs1 = @[]
   xs2 = @[1, 2, 3]
   sym_diff1(xs1, xs2, buf, is1, is2, 20)
-  assert $buf == "{1, 2, 3}"
+  assert $buf == "@[1, 2, 3]"
 
   is1 = initIntSet()
   is2 = initIntSet()
-  buf = initIntSet()
+  buf = newSeqOfCap[int](64)
   xs1 = @[1, 2, 3]
   xs2 = @[]
   sym_diff1(xs1, xs2, buf, is1, is2, 20)
@@ -79,7 +87,7 @@ when isMainModule:
 
   is1 = initIntSet()
   is2 = initIntSet()
-  buf = initIntSet()
+  buf = newSeqOfCap[int](64)
   xs1 = @[1, 2, 3]
   xs2 = @[1, 2, 3]
   sym_diff1(xs1, xs2, buf, is1, is2, 20)
@@ -87,7 +95,7 @@ when isMainModule:
 
   is1 = initIntSet()
   is2 = initIntSet()
-  buf = initIntSet()
+  buf = newSeqOfCap[int](64)
   xs1 = @[1, 2]
   xs2 = @[1, 2, 3]
   sym_diff1(xs1, xs2, buf, is1, is2, 20)
@@ -95,7 +103,7 @@ when isMainModule:
 
   is1 = initIntSet()
   is2 = initIntSet()
-  buf = initIntSet()
+  buf = newSeqOfCap[int](64)
   xs1 = @[1, 2, 3]
   xs2 = @[2, 3]
   sym_diff1(xs1, xs2, buf, is1, is2, 20)
@@ -103,7 +111,7 @@ when isMainModule:
 
   is1 = initIntSet()
   is2 = initIntSet()
-  buf = initIntSet()
+  buf = newSeqOfCap[int](64)
   xs1 = @[1, 2, 3, 4]
   xs2 = @[2, 3]
   sym_diff1(xs1, xs2, buf, is1, is2, 20)
@@ -111,7 +119,7 @@ when isMainModule:
 
   is1 = initIntSet()
   is2 = initIntSet()
-  buf = initIntSet()
+  buf = newSeqOfCap[int](64)
   xs1 = @[2, 3]
   xs2 = @[1, 2, 3, 4]
   sym_diff1(xs1, xs2, buf, is1, is2, 20)
@@ -119,7 +127,7 @@ when isMainModule:
 
   is1 = initIntSet()
   is2 = initIntSet()
-  buf = initIntSet()
+  buf = newSeqOfCap[int](64)
   xs1 = @[]
   xs2 = @[]
   sym_diff1(xs1, xs2, buf, is1, is2, 20)
@@ -128,7 +136,7 @@ when isMainModule:
   is1 = initIntSet()
   is2 = initIntSet()
   is2.incl(1)
-  buf = initIntSet()
+  buf = newSeqOfCap[int](64)
   xs1 = @[1, 2, 3]
   xs2 = @[]
   sym_diff1(xs1, xs2, buf, is1, is2, 20)
@@ -137,7 +145,7 @@ when isMainModule:
   is1 = initIntSet()
   is2 = initIntSet()
   is1.incl(1)
-  buf = initIntSet()
+  buf = newSeqOfCap[int](64)
   xs1 = @[]
   xs2 = @[1, 2, 3]
   sym_diff1(xs1, xs2, buf, is1, is2, 20)
@@ -146,7 +154,7 @@ when isMainModule:
   is1 = initIntSet()
   is2 = initIntSet()
   is1.incl(1)
-  buf = initIntSet()
+  buf = newSeqOfCap[int](64)
   xs1 = @[3, 4]
   xs2 = @[1, 2, 3]
   sym_diff1(xs1, xs2, buf, is1, is2, 20)
@@ -155,7 +163,7 @@ when isMainModule:
   is1 = initIntSet()
   is2 = initIntSet()
   is2.incl(1)
-  buf = initIntSet()
+  buf = newSeqOfCap[int](64)
   xs1 = @[1, 2, 3]
   xs2 = @[3, 4]
   sym_diff1(xs1, xs2, buf, is1, is2, 20)
@@ -169,7 +177,7 @@ when isMainModule:
   is1.incl(4)
   is1.incl(5)
   is1.incl(6)
-  buf = initIntSet()
+  buf = newSeqOfCap[int](64)
   xs1 = @[1, 2, 3]
   xs2 = @[4, 5, 6]
   sym_diff1(xs1, xs2, buf, is1, is2, 20)
@@ -181,7 +189,7 @@ when isMainModule:
   is2.incl(2)
   is1.incl(5)
   is1.incl(6)
-  buf = initIntSet()
+  buf = newSeqOfCap[int](64)
   xs1 = @[1, 2, 3]
   xs2 = @[4, 5, 6]
   sym_diff1(xs1, xs2, buf, is1, is2, 20)
@@ -193,7 +201,7 @@ when isMainModule:
   is2.incl(2)
   is1.incl(5)
   is1.incl(6)
-  buf = initIntSet()
+  buf = newSeqOfCap[int](64)
   buf.incl(0)
   buf.incl(10)
   xs1 = @[1, 2, 3]

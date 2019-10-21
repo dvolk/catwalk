@@ -146,7 +146,7 @@ proc new_CatWalk*(name: string, reference: Sample, mask: Mask) : CatWalk =
   c.name = name
   c.reference = reference
   c.mask = mask
-  c.settings.max_distance = 20
+  c.settings.max_distance = 50
   c.settings.max_n_positions = 130000
   c.settings.min_quality = 80
   return c
@@ -186,7 +186,7 @@ proc add_samples*(c: var CatWalk, samples: var seq[Sample]) =
     c.process_neighbours(c.sample_indexes[sample.name])
     c.process_times.add(cpuTime() - time1)
 
-proc get_neighbours*(c: CatWalk, sample_name: string, distance: int = 20) : seq[(string, int)] =
+proc get_neighbours*(c: CatWalk, sample_name: string, distance: int = 50) : seq[(string, int)] =
   result = @[]
   let sample_index = c.sample_indexes[sample_name]
   if sample_index in c.neighbours:
@@ -209,7 +209,7 @@ when isMainModule:
     c = new_CatWalk("test", reference, mask)
     s: seq[Sample]
 
-  c.settings.max_distance = 20
+  c.settings.max_distance = 50
   c.settings.max_n_positions = 2
 
   s = @[s1, s2, s5, s3, s4]
