@@ -13,8 +13,6 @@ import fasta
 import catwalk
 import cw_db
 
-var c: CatWalk
-
 proc load_samples(): seq[Sample] =
   for x in cw_db.all_samples():
     var
@@ -49,26 +47,14 @@ proc main(bind_host: string = "0.0.0.0",
     mask = new_Mask(mask_name, readFile(mask_filepath))
     max_distance = 20
     max_n_positions = 130000
-
-  c = new_CatWalk(instance_name, reference, mask)
+  var
+    c = new_CatWalk(instance_name, reference, mask)
 
   if create_database:
     create_db()
-    set_config_key("bind_host", bind_host)
-    set_config_key("bind_port", $bind_port)
-    set_config_key("instance_name", instance_name)
-    set_config_key("reference_name", reference_name)
-    set_config_key("reference_filepath", reference_filepath)
-    set_config_key("mask_name", mask_name)
-    set_config_key("mask_filepath", mask_filepath)
-    set_config_key("max_distance", $max_distance)
-    set_config_key("max_n_positions", $max_n_positions)
 
   c.samples = load_samples()
   c.neighbours = load_neighbours()
-
-  echo "Loaded " & $c.samples.len & " samples."
-  echo "Loaded " & $c.neighbours.len & " neighbour entries."
 
   var
     queue: seq[QueueElem]
@@ -82,7 +68,7 @@ proc main(bind_host: string = "0.0.0.0",
         let
           sample_name = q.name
           (header, sequence) = parse_fasta_file(q.filepath)
-        samples = @[new_Sample(sample_name, sequence)]   
+        samples.add(new_Sample(sample_name, sequence))
 
       # add samples to catwalk
       c.add_samples(samples)
@@ -101,6 +87,6 @@ proc main(bind_host: string = "0.0.0.0",
                                 $$c.get_neighbours(new_sample.name))
         echo "added " & new_sample.name
     sleep(2)
-  
+
 when isMainModule:
   dispatch(main)
