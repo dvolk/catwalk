@@ -12,12 +12,12 @@ proc info() =
   let response = client.request("http://127.0.0.1:5000/info")
   echo response.body
 
-proc add_sample(fasta_filepath: string) =
+proc add_sample(fasta_filepath: string, remove_extension=".fasta") =
   let (_, sequence) = parse_fasta_file(fasta_filepath)
   var
     xs = fasta_filepath.split('/')
     xs_last = xs[xs.len - 1]
-    name = xs_last.replace(".fasta", "").replace(".fa", "")
+    name = xs_last.replace(remove_extension, "")
   let body = %*{
     "name": name,
     "sequence": sequence

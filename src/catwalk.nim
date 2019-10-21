@@ -8,7 +8,7 @@ import symdiff
 type
   Sequence = string
 
-  CompressedSequence = array[4, seq[int]]
+  CompressedSequence* = array[4, seq[int]]
 
   SampleStatus* = enum
     Unknown
