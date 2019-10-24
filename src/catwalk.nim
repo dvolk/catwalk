@@ -163,8 +163,6 @@ proc process_neighbours(c: var CatWalk, sample1_index: int) =
       sample2 = c.samples[sample2_index]
     if sample2.status != Ok:
       continue
-    #if c.neighbours.contains((sample1.name, k)) or c.neighbours.contains((k, sample1.name)):
-    #  continue
     let
       d = count_diff2(sample1.diffsets, sample2.diffsets, sample1.n_positions, sample2.n_positions, c.settings.max_distance)
     if d <= c.settings.max_distance:
