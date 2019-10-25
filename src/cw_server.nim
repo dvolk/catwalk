@@ -17,44 +17,18 @@ template check_param(p: string) =
   if not js.contains(p):
     resp "Missing parameter: " & p
 
-proc `%`(s: Sample): JsonNode =
-  %[("name", %s.name), ("status", %s.status), ("n_positions_len", %s.n_positions.len), ("quality", %s.quality), ("compressed_sequence_counts", %compressed_sequence_counts(s.diffsets)), ("ref_distance", %s.ref_distance), ("n_positions_len", %s.n_positions.len)]
-
-proc add_samples_from_dir*(c: var CatWalk, samples_dir: string) =
-  var
-    samples: seq[Sample]
-  for kind, path in walkDir(samples_dir):
-    let
-      (sample_header, sample_seq) = parse_fasta_file(path)
-    var
-      xs = path.split('/')
-      xs_last = xs[xs.len - 1]
-      name = xs_last.replace(".fasta", "").replace(".fa", "")
-
-    samples.add(new_Sample(name, sample_seq))
-  # add samples to catwalk
-  c.add_samples(samples)
-
 router app:
   get "/info":
-    var
-      n_ok_samples = 0
-
-    #for k in c.samples.keys:
-    #  if c.samples[k].status == Ok:
-    #    n_ok_samples = n_ok_samples = 1
-
     resp %*{ "name": c.name,
-             "reference_name": c.reference.name,
-             "reference_sequence_length": c.reference.sequence.len,
+             "reference_name": c.reference_name,
+             "reference_sequence_length": c.reference_sequence.len,
              "mask_name": c.mask.name,
              "mask_positions": c.mask.positions.len,
              "max_distance": c.settings.max_distance,
              "max_n_positions": c.settings.max_n_positions,
              "total_mem": getTotalMem(),
              "occupied_mem": getOccupiedMem(),
-             "n_samples": c.samples.len,
-             "n_ok_samples": n_ok_samples,
+             "n_samples": c.active_samples.len,
              "n_neighbour_entries": c.neighbours.len
            }
 
@@ -63,13 +37,13 @@ router app:
 
   get "/list_samples":
     var
-      ret: string
-    for s in c.samples:
-      ret = ret & $[s.name, $s.status, $s.n_positions.len] & "\n"
-    resp %*c.samples
+      ret = newJArray()
+    for i, x in c.active_samples:
+      ret.add(%*c.all_sample_names[i])
+    resp ret
 
   get "/get_sample/@name":
-    resp %*(c.samples[c.sample_indexes[@"name"]])
+    resp %*({ "name": @"name" })
 
   get "/get_samples/@from/@to":
     var
@@ -77,13 +51,12 @@ router app:
       j = parseInt(@"to")
     if i < 0:
       i = 0
-    if j >= len(c.samples):
-      j = len(c.samples)
+    if j >= len(c.active_samples):
+      j = len(c.active_samples)
     var
-      r: seq[JsonNode]
-      n = 0
-    for s in c.samples[i..<j]:
-      r.add(%*s)
+      r = newJArray()
+    for k, _ in c.active_samples[i..<j]:
+      r.add(%*c.all_sample_names[i + k])
     resp %*(r)
 
   post "/add_sample":
@@ -92,26 +65,20 @@ router app:
 
     check_param "name"
     check_param "sequence"
+    check_param "keep"
 
-    if c.sample_indexes.contains($js["name"]):
-      resp "Sample " & js["name"].getStr() & " already exists"
-
-    var
-      s = new_Sample(js["name"].getStr(), js["sequence"].getStr())
-      xs = @[s]
-    c.add_samples(xs)
-
-    resp "Added " & js["name"].getStr()
-
-  post "/add_samples_from_dir":
     let
-      js = parseJson(request.body)
-    check_param "samples_dir"
+      name = js["name"].getStr()
+      sequence = js["sequence"].getStr()
 
-    c.add_samples_from_dir(js["samples_dir"].getStr())
-    resp "ok"
+    if c.all_sample_indexes.contains(name):
+      resp "Sample " & name & " already exists"
 
-  get "/neighbours/@name/@distance":
+    c.add_sample(name, sequence, true)
+
+    resp "Added " & name
+
+  get "/neighbours/@name":
     let
       ns = c.get_neighbours(@"name")
     var
@@ -123,14 +90,6 @@ router app:
   get "/process_times":
     resp %*(c.process_times)
 
-  get "/save":
-    writeFile("samples.dat", $$c.samples)
-    writeFile("neighbours.dat", $$c.neighbours)
-
-  get "/load":
-    c.samples = to[seq[Sample]](readFile("samples.dat"))
-    c.neighbours = to[Table[int, seq[(int, int)]]](readFile("neighbours.dat"))
-
 proc main(bind_host: string = "0.0.0.0",
           bind_port: int = 5000,
           instance_name: string,
@@ -140,11 +99,10 @@ proc main(bind_host: string = "0.0.0.0",
           mask_filepath: string) =
   let
     (_, refseq) = parse_fasta_file(reference_filepath)
-    reference = new_Sample(reference_filepath, refseq)
     mask = new_Mask(mask_name, readFile(mask_filepath))
 
   echo mask.positions.len
-  c = new_CatWalk(instance_name, reference, mask)
+  c = new_CatWalk(instance_name, reference_name, refseq, mask)
 
   var
     port = bind_port.Port

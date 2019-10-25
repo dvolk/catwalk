@@ -42,7 +42,7 @@ router app:
     let
       r1 = client.request(cw_server_url() & "/get_sample/" & @"sample_name")
       sample = parseJson(r1.body)
-      r2 = client.request(cw_server_url() & "/neighbours/" & @"sample_name" & "/50")
+      r2 = client.request(cw_server_url() & "/neighbours/" & @"sample_name")
       neighbours = parseJson(r2.body)
     resp generateSamplePage(sample, neighbours)
 
