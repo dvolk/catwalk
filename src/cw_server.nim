@@ -96,13 +96,15 @@ proc main(bind_host: string = "0.0.0.0",
           reference_name: string,
           reference_filepath: string,
           mask_name: string,
-          mask_filepath: string) =
+          mask_filepath: string,
+          max_distance: int) =
   let
     (_, refseq) = parse_fasta_file(reference_filepath)
     mask = new_Mask(mask_name, readFile(mask_filepath))
 
   echo mask.positions.len
   c = new_CatWalk(instance_name, reference_name, refseq, mask)
+  c.settings.max_distance = max_distance
 
   var
     port = bind_port.Port
