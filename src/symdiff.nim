@@ -47,10 +47,6 @@ proc sym_diff1*(xs: seq[int], ys: seq[int], buf: var seq[int], s1_n_positions: I
 var
   buf2 = newSeqOfCap[int](64)
 proc sum_sym_diff1*(xs0, xs1, xs2, xs3, xs4, xs5, xs6, xs7: seq[int], s1_n_positions: IntSet, s2_n_positions: IntSet, max_dist: int) : int =
-  if s1_n_positions.len == 0 and s2_n_positions.len == 0:
-    if abs(xs0.len - xs1.len) > max_dist or abs(xs2.len - xs3.len) > max_dist or
-       abs(xs4.len - xs5.len) > max_dist or abs(xs6.len - xs7.len) > max_dist:
-      return max_dist + 1
   buf2.setlen(0)
   symdiff1(xs0, xs1, buf2, s1_n_positions, s2_n_positions, max_dist)
   if buf2.len > max_dist: return max_dist + 1
