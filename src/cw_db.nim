@@ -21,9 +21,13 @@ proc add_to_queue*(filepath: string) =
 proc remove_from_queue*(filepath: string) =
   db.exec(sql"delete from queue where filepath = ?", filepath)
 
-iterator get_queue*(): string =
-  for x in db.fastRows(sql"select filepath from queue"):
-    yield x[0]
+proc get_queue*(): seq[string] =
+  result = @[]
+  try:
+    for row in db.fastRows(sql"select filepath from queue"):
+      result.add(row[0])
+  except:
+    return result
 
 #
 # saving
@@ -38,3 +42,4 @@ proc persist_sample*(index, name, status, diffsets: string, n_positions: IntSet)
 
 proc update_neighbours*(sample_index, neighbours: string) =
   db.exec(sql"""insert or replace into neighbours values (?, ?)""", sample_index, neighbours)
+  

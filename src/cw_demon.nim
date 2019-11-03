@@ -45,7 +45,8 @@ proc load(c: var CatWalk) =
 
 proc loop(c: var CatWalk) =
   while true:
-    for q_filepath in cw_db.get_queue():
+    var queue = cw_db.get_queue()
+    for q_filepath in queue:
       echo "adding " & q_filepath
       let
         (header, sequence) = parse_fasta_file(q_filepath)
@@ -58,12 +59,14 @@ proc loop(c: var CatWalk) =
                            $$new_sample.status, $$new_sample.diffsets, new_sample.n_positions)
       if new_index in c.neighbours:
         cw_db.update_neighbours($new_index, $$c.neighbours[new_index])
+        for old_index, distance in c.neighbours[new_index]:
+          cw.add_neighbour_to_existing_neighbours_entry($new_index, $old_index, $distance)
       else:
         cw_db.update_neighbours($new_index, "[]")
       cw_db.remove_from_queue(q_filepath)
+      echo c.neighbours
 
       echo "added " & q_filepath
-    sleep(2)
 
 proc main(instance_name: string, reference_filepath: string, mask_filepath: string) =
   let
@@ -71,6 +74,7 @@ proc main(instance_name: string, reference_filepath: string, mask_filepath: stri
     mask = new_Mask(mask_filepath, readFile(mask_filepath))
   var
     c = new_CatWalk(instance_name, reference_filepath, reference_sequence, mask)
+  c.settings.max_distance = 1000
 
   cw_db.create_db()
   c.load()
