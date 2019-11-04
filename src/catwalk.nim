@@ -35,7 +35,7 @@ type
     reference_name: string
     reference_sequence: string
     mask: Mask
-    active_samples: seq[Sample]
+    active_samples: Table[int, Sample]
     all_sample_indexes: Table[string, int]
     all_sample_names: Table[int, string]
     neighbours: Table[int, seq[(int, int)]]
@@ -136,7 +136,7 @@ proc new_CatWalk*(name: string, reference_name: string, reference_sequence: stri
 proc process_neighbours(c: var CatWalk, sample1: var Sample, sample1_index: int) =
   if sample1.status != Ok:
     return
-  for sample2_index in 0..c.active_samples.high:
+  for sample2_index in c.active_samples.keys:
     if sample2_index == sample1_index:
       continue
     let
@@ -156,12 +156,13 @@ proc process_neighbours(c: var CatWalk, sample1: var Sample, sample1_index: int)
 proc add_sample*(c: var CatWalk, name: string, sequence: string, keep: bool) =
   var
     sample = reference_compress(sequence, c.reference_sequence, c.mask, c.settings.max_n_positions)
-  if keep:
-    c.active_samples.add(sample)
 
   let sample_index = len(c.all_sample_indexes)
   c.all_sample_indexes[name] = sample_index
   c.all_sample_names[sample_index] = name
+
+  if keep:
+    c.active_samples[sample_index] = sample
 
   let time1 = cpuTime()
   c.process_neighbours(sample, sample_index)

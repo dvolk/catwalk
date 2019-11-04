@@ -3,43 +3,41 @@ import options
 import intsets
 import marshal
 import sequtils
+import strutils
 
 let db* = open("cw.sql", "", "", "")
 
 proc create_db*() =
-  cw_db.db.exec(sql"create table if not exists active_samples (status, diffsets, n_positions)")
-  cw_db.db.exec(sql"create table if not exists all_sample_names (name, id)")
-  cw_db.db.exec(sql"create table if not exists neighbours (id, neighbours)")
-  cw_db.db.exec(sql"create table if not exists queue (filepath)")
+  cw_db.db.exec(sql"create table if not exists active_samples (id primary key, status, diffsets, n_positions)")
+  cw_db.db.exec(sql"create table if not exists all_sample_names (id primary key, name)")
+  cw_db.db.exec(sql"create table if not exists neighbours (id primary key, neighbours)")
+  cw_db.db.exec(sql"create table if not exists queue (filepath, keep)")
 
 #
 # queue
 #
-proc add_to_queue*(filepath: string) =
-  db.exec(sql"insert into queue (filepath, status) values (?)")
+proc get_queue*(): seq[(string, bool)] =
+  result = @[]
+  try:
+    for row in db.fastRows(sql"select filepath, keep from queue"):
+      result.add((row[0], parseBool(row[1])))
+  except:
+    return result
 
 proc remove_from_queue*(filepath: string) =
   db.exec(sql"delete from queue where filepath = ?", filepath)
 
-proc get_queue*(): seq[string] =
-  result = @[]
-  try:
-    for row in db.fastRows(sql"select filepath from queue"):
-      result.add(row[0])
-  except:
-    return result
-
 #
 # saving
 #
-proc persist_sample*(index, name, status, diffsets: string, n_positions: IntSet) =
+proc persist_sample*(index, name, status, diffsets: string, n_positions: IntSet, keep: bool) =
   var
     ns = newSeqOfCap[int](n_positions.len)
   for n in n_positions.items():
     ns.add(n)
-  db.exec(sql"""insert into active_samples (status, diffsets, n_positions) values (?, ?, ?)""", status, diffsets, $$ns)
-  db.exec(sql"""insert into all_sample_names (name, id) values (?, ?)""", name, index)
+  db.exec(sql"""insert into active_samples (id, status, diffsets, n_positions) values (?, ?, ?, ?)""", index, status, diffsets, $$ns)
 
 proc update_neighbours*(sample_index, neighbours: string) =
+  echo "update_neighbours " & sample_index & " " & neighbours
   db.exec(sql"""insert or replace into neighbours values (?, ?)""", sample_index, neighbours)
   
