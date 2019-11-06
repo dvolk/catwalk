@@ -38,7 +38,7 @@ type
     active_samples: Table[int, Sample]
     all_sample_indexes: Table[string, int]
     all_sample_names: Table[int, string]
-    neighbours: Table[int, seq[(int, int)]]
+    neighbours: Table[int, seq[array[2, int]]]
     process_times: seq[float]
 
 #
@@ -147,11 +147,11 @@ proc process_neighbours(c: var CatWalk, sample1: var Sample, sample1_index: int)
       d = count_diff2(sample1.diffsets, sample2.diffsets, sample1.n_positions, sample2.n_positions, c.settings.max_distance)
     if d <= c.settings.max_distance:
       if not c.neighbours.contains(sample1_index):
-        c.neighbours[sample1_index] = newSeqOfCap[(int, int)](16)
-      c.neighbours[sample1_index].add((sample2_index, d))
+        c.neighbours[sample1_index] = newSeqOfCap[array[2, int]](16)
+      c.neighbours[sample1_index].add([sample2_index, d])
       if not c.neighbours.contains(sample2_index):
-        c.neighbours[sample2_index] = newSeqOfCap[(int, int)](16)
-      c.neighbours[sample2_index].add((sample1_index, d))
+        c.neighbours[sample2_index] = newSeqOfCap[array[2, int]](16)
+      c.neighbours[sample2_index].add([sample1_index, d])
 
 proc add_sample*(c: var CatWalk, name: string, sequence: string, keep: bool) =
   var

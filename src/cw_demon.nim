@@ -34,7 +34,7 @@ proc load(c: var CatWalk) =
   # load neighbours
   var i = 0
   for x in cw_db.db.instantRows(sql"select id, neighbours from neighbours"):
-    c.neighbours[i] = to[seq[(int, int)]](x[1])
+    c.neighbours[i] = to[seq[array[2, int]]](x[1])
     inc i
 
   # load all_sample_names
@@ -49,7 +49,7 @@ proc load(c: var CatWalk) =
   echo "Loaded " & $c.active_samples.len & " active samples and " &
     $c.all_sample_names.len & " total samples in " & $dt & " seconds"
         
-  echo c.neighbours
+  #echo c.neighbours
 
 proc loop(c: var CatWalk) =
   while true:
@@ -64,7 +64,7 @@ proc loop(c: var CatWalk) =
       let
         new_index = c.all_sample_names.len - 1
 
-      echo $new_index
+      #echo $new_index
 
       if keep:
         let new_sample = c.active_samples[new_index]
@@ -79,18 +79,16 @@ proc loop(c: var CatWalk) =
       if new_index in c.neighbours:
         cw_db.update_neighbours($new_index, $$c.neighbours[new_index])
         for (sample2_index, distance) in c.neighbours[new_index]:
-          echo $sample2_index & " " & $distance
+          #echo $sample2_index & " " & $distance
           if sample2_index < new_index:
             cw_db.update_neighbours($sample2_index, $$c.neighbours[sample2_index])
-      else:
-        cw_db.update_neighbours($new_index, "[]")
       cw_db.remove_from_queue(q_filepath)
-      echo c.neighbours
+      #echo c.neighbours
 
       echo "added " & q_filepath
-      echo "have " & $c.active_samples.len & " active samples and " &
-        $c.all_sample_names.len & " total"
     sleep(1000)
+    echo "have " & $c.active_samples.len & " active samples and " &
+      $c.all_sample_names.len & " total"
 
 proc main(instance_name: string, reference_filepath: string, mask_filepath: string) =
   let
