@@ -38,8 +38,8 @@ router app:
   get "/list_samples":
     var
       ret = newJArray()
-    for i, x in c.active_samples:
-      ret.add(%*c.all_sample_names[i])
+    for k in c.active_samples.keys:
+      ret.add(%*c.all_sample_names[k])
     resp ret
 
   get "/get_sample/@name":
@@ -55,8 +55,8 @@ router app:
       j = len(c.active_samples)
     var
       r = newJArray()
-    for k, _ in c.active_samples[i..<j]:
-      r.add(%*c.all_sample_names[i + k])
+    for k in i..<j:
+      r.add(%*c.all_sample_names[k])
     resp %*(r)
 
   post "/add_sample":
