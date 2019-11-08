@@ -12,7 +12,7 @@ It is based on the design of findNeighbour3 by David Wyllie.
 
 ## Building
 
-nimble build -d:danger -d:release
+    nimble build -d:release -d:danger 
 
 This creates three binaries: `cw_server`, `cw_client` and `cw_webui`
 
@@ -27,7 +27,7 @@ This creates three binaries: `cw_server`, `cw_client` and `cw_webui`
 
 ## Batch adding samples
 
-use something like find e.g.:
+use something like `find`. e.g.:
 
     find path/to/your/fasta/files -type f -exec ./cw_client add_sample -f {} \;
 
