@@ -1,6 +1,7 @@
 import json
 import tables
 import sequtils
+import intsets
 
 import nimpy
 
@@ -37,6 +38,19 @@ proc add_sample_from_refcomp(name: string, refcomp_json: string, keep: bool = tr
     for x in j[c].getElems():
       tbl_buf[c].add(x.getInt())
   c.add_sample_from_refcomp(name, tbl_buf, keep)
-  
+
 proc neighbours(sample_name: string): seq[(string, int)] {.exportpy.} =
   return c.get_neighbours(sample_name)
+
+proc status(): Table[string, string] {.exportpy.} =
+  result["name"] = c.name
+  result["reference_name"] = c.reference_name
+  result["reference_sequence_length"] = $c.reference_sequence.len
+  result["mask_name"] = c.mask.name
+  result["mask_positions_length"] = $c.mask.positions.len
+  result["max_distance"] = $c.settings.max_distance
+  result["max_n_positions"] = $c.settings.max_n_positions
+  result["total_mem"] = $getTotalMem()
+  result["occupied_mem"] = $getOccupiedMem()
+  result["n_samples"] = $c.active_samples.len
+  result["n_neighbour_entries"] = $c.neighbours.len
