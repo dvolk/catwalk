@@ -10,7 +10,45 @@ It is based on the design of findNeighbour3 by David Wyllie.
 
 - nim >= 1.0.0
 
+### Installing nim
+
+The following assumes you're putting nim in the home directory, but you can put it anywhere and then edit the paths below
+
+1. Nim requires gcc:
+```
+sudo apt install gcc
+```
+
+2. Download and extract nim:
+```
+cd
+wget https://nim-lang.org/download/nim-1.0.2-linux_x64.tar.xz
+tar xf nim-1.0.2-linux_x64.tar.xz
+```
+
+3. to be able to run nim from any directory, add it to the `PATH` variable (replace yourusername with your username):
+```
+echo 'PATH=$PATH:/home/yourusername/nim-1.0.2/bin' >> .bashrc
+```
+
+4. When you run `nimble install` (the nim package manager), it puts binaries into `~/.nimble/bin`, so add that too (replace yourusername with your username):
+```
+echo 'PATH=$PATH:/home/yourusername/.nimble/bin' >> .bashrc
+```
+
+5. Source the bashrc file:
+```
+source ~/.bashrc
+```
+6. Confirm it's working:
+```
+$ nim -v
+Nim Compiler Version 1.0.2 [Linux: amd64]
+```
+
 ## Building
+
+in the catwalk directory, run:
 
     nimble build -d:release -d:danger 
 
