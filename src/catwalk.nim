@@ -168,6 +168,28 @@ proc add_sample*(c: var CatWalk, name: string, sequence: string, keep: bool) =
   c.process_neighbours(sample, sample_index)
   c.process_times.add(cpuTime() - time1)
 
+proc add_sample_from_refcomp*(c: var CatWalk, name: string, tbl: Table[string, seq[int]], keep: bool) =
+  var
+    sample = new_Sample()
+
+  sample.status = Ok
+  for x in tbl["N"]: sample.n_positions.incl(x)
+  sample.diffsets[0] = tbl["A"]
+  sample.diffsets[1] = tbl["C"]
+  sample.diffsets[2] = tbl["G"]
+  sample.diffsets[3] = tbl["T"]
+
+  let sample_index = len(c.all_sample_indexes)
+  c.all_sample_indexes[name] = sample_index
+  c.all_sample_names[sample_index] = name
+
+  if keep:
+    c.active_samples[sample_index] = sample
+
+  let time1 = cpuTime()
+  c.process_neighbours(sample, sample_index)
+  c.process_times.add(cpuTime() - time1)
+
 proc get_neighbours*(c: CatWalk, sample_name: string) : seq[(string, int)] =
   result = @[]
   let sample_index = c.all_sample_indexes[sample_name]
