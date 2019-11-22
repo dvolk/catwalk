@@ -2,6 +2,7 @@ import tables
 import intsets
 import strutils
 import times
+import json
 
 import symdiff
 
@@ -168,16 +169,18 @@ proc add_sample*(c: var CatWalk, name: string, sequence: string, keep: bool) =
   c.process_neighbours(sample, sample_index)
   c.process_times.add(cpuTime() - time1)
 
-proc add_sample_from_refcomp*(c: var CatWalk, name: string, tbl: Table[string, seq[int]], keep: bool) =
+proc add_sample_from_refcomp*(c: var CatWalk, name: string, refcomp_json: string, keep: bool) =
+  let
+    tbl = parseJson(refcomp_json)
   var
     sample = new_Sample()
 
   sample.status = Ok
-  for x in tbl["N"]: sample.n_positions.incl(x)
-  sample.diffsets[0] = tbl["A"]
-  sample.diffsets[1] = tbl["C"]
-  sample.diffsets[2] = tbl["G"]
-  sample.diffsets[3] = tbl["T"]
+  for x in tbl["N"]: sample.n_positions.incl(x.getInt())
+  for x in tbl["A"]: sample.diffsets[0].add(x.getInt())
+  for x in tbl["C"]: sample.diffsets[1].add(x.getInt())
+  for x in tbl["G"]: sample.diffsets[2].add(x.getInt())
+  for x in tbl["T"]: sample.diffsets[3].add(x.getInt())
 
   let sample_index = len(c.all_sample_indexes)
   c.all_sample_indexes[name] = sample_index

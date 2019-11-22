@@ -17,6 +17,9 @@ template check_param(p: string) =
   if not js.contains(p):
     resp "Missing parameter: " & p
 
+proc add_sample_from_refcomp(name: string, refcomp_json: string, keep: bool = true) =
+  c.add_sample_from_refcomp(name, refcomp_json, true)
+
 router app:
   get "/info":
     resp %*{ "name": c.name,
@@ -76,6 +79,15 @@ router app:
 
     c.add_sample(name, sequence, true)
 
+    resp "Added " & name
+
+  post "/add_sample_from_refcomp":
+    let
+      js = parseJson(request.body)
+      name = js["name"].getStr()
+      refcomp = js["refcomp"].getStr()
+
+    add_sample_from_refcomp(name, refcomp, true)
     resp "Added " & name
 
   get "/neighbours/@name":
