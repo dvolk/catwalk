@@ -55,13 +55,7 @@ proc add_sample_from_refcomp(name: string, refcomp_json: string, keep: bool = tr
                               "refcomp_json": refcomp_json,
                               "keep": keep }))
   flushFile(log_handle)
-  let
-    j = parseJson(refcomp_json)
-  for c in ["A", "C", "G", "T", "N"]:
-    tbl_buf[c].setLen(0)
-    for x in j[c].getElems():
-      tbl_buf[c].add(x.getInt())
-  c.add_sample_from_refcomp(name, tbl_buf, keep)
+  c.add_sample_from_refcomp(name, refcomp_json, keep)
 
 proc neighbours(sample_name: string): seq[(string, int)] {.exportpy.} =
   write(log_handle, $(%*{ "function": "neighbours",
