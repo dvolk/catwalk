@@ -58,10 +58,10 @@ def add_sample_from_refcomp(name, refcomp_json, host="localhost", port=5000):
 
     The json dict must have all keys: ACGTN, even if they're empty
     """
-    requests.post(f"http://{host}:{port}/add_sample_from_refcomp",
-                  json={ "name": name,
-                         "refcomp": refcomp_json,
-                         "keep": True })
+    return requests.post(f"http://{host}:{port}/add_sample_from_refcomp",
+                         json={ "name": name,
+                                "refcomp": refcomp_json,
+                                "keep": True })
 
 def neighbours(name, host="localhost", port=5000):
     """
