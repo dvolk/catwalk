@@ -25,7 +25,7 @@ proc add_sample(fasta_filepath: string, remove_extension=".fasta") =
   }
   client.headers = newHttpHeaders({ "Content-Type": "application/json" })
   let response = client.request("http://127.0.0.1:5000/add_sample", httpMethod = HttpPost, body = $body)
-  echo response.body
+  echo $response.status & " " & $response.body
 
 proc list_samples() =
   let response = client.request("http://127.0.0.1:5000/list_samples")

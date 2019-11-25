@@ -75,11 +75,10 @@ router app:
       sequence = js["sequence"].getStr()
 
     if c.all_sample_indexes.contains(name):
-      resp "Sample " & name & " already exists"
+      resp Http200, "Sample " & name & " already exists"
 
     c.add_sample(name, sequence, true)
-
-    resp "Added " & name
+    resp Http201, "Added " & name
 
   post "/add_sample_from_refcomp":
     let
@@ -87,8 +86,11 @@ router app:
       name = js["name"].getStr()
       refcomp = js["refcomp"].getStr()
 
+    if c.all_sample_indexes.contains(name):
+      resp Http200, "Sample " & name & " already exists"
+
     add_sample_from_refcomp(name, refcomp, true)
-    resp "Added " & name
+    resp Http201, "Added " & name
 
   get "/neighbours/@name":
     let
