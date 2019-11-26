@@ -93,6 +93,9 @@ router app:
     resp Http201, "Added " & name
 
   get "/neighbours/@name":
+    if not c.all_sample_indexes.contains(@"name"):
+      resp Http404, "Sample " & @"name" & " doesn't exist"
+
     let
       ns = c.get_neighbours(@"name")
     var
