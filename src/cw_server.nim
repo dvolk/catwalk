@@ -3,7 +3,7 @@ import tables
 import intsets
 import strutils
 import marshal
-import os
+import system
 
 import catwalk
 import fasta
@@ -12,6 +12,9 @@ import jester
 import cligen
 
 var c: CatWalk
+
+const compile_version = gorge "git describe --tags --always --dirty"
+const compile_time = gorge "date --rfc-3339=seconds"
 
 template check_param(p: string) =
   if not js.contains(p):
@@ -32,7 +35,9 @@ router app:
              "total_mem": getTotalMem(),
              "occupied_mem": getOccupiedMem(),
              "n_samples": c.active_samples.len,
-             "n_neighbour_entries": c.neighbours.len
+             "n_neighbour_entries": c.neighbours.len,
+             "compile_version": compile_version,
+             "compile_time": compile_time
            }
 
   get "/debug":
