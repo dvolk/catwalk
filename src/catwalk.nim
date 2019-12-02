@@ -3,6 +3,7 @@ import intsets
 import strutils
 import times
 import json
+import algorithm
 
 import symdiff
 
@@ -181,6 +182,10 @@ proc add_sample_from_refcomp*(c: var CatWalk, name: string, refcomp_json: string
   for x in tbl["C"]: sample.diffsets[1].add(x.getInt())
   for x in tbl["G"]: sample.diffsets[2].add(x.getInt())
   for x in tbl["T"]: sample.diffsets[3].add(x.getInt())
+  sample.diffsets[0].sort()
+  sample.diffsets[1].sort()
+  sample.diffsets[2].sort()
+  sample.diffsets[3].sort()
 
   let sample_index = len(c.all_sample_indexes)
   c.all_sample_indexes[name] = sample_index
