@@ -120,6 +120,9 @@ proc main(bind_host: string = "0.0.0.0",
           mask_name: string,
           mask_filepath: string,
           max_distance: int) =
+  echo "starting cw_server " & compile_version &
+    " (build time: " & compile_time & ")"
+
   let
     (_, refseq) = parse_fasta_file(reference_filepath)
     mask = new_Mask(mask_name, readFile(mask_filepath))
