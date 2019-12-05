@@ -35,9 +35,5 @@ proc neighbours(name: string) =
   let response = client.request("http://127.0.0.1:5000/neighbours/" & name & "/50")
   echo response.body
 
-proc process_times() =
-  let response = client.request("http://127.0.0.1:5000/process_times")
-  echo response.body
-
 when isMainModule:
-  dispatchMulti([info], [add_sample], [neighbours], [list_samples], [process_times])
+  dispatchMulti([info], [add_sample], [neighbours], [list_samples])

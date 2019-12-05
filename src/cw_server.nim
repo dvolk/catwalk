@@ -11,7 +11,9 @@ import fasta
 import jester
 import cligen
 
-var c: CatWalk
+var
+  c: CatWalk
+  default_max_distance: int
 
 const compile_version = gorge "git describe --tags --always --dirty"
 const compile_time = gorge "date --rfc-3339=seconds"
@@ -20,22 +22,16 @@ template check_param(p: string) =
   if not js.contains(p):
     resp "Missing parameter: " & p
 
-proc add_sample_from_refcomp(name: string, refcomp_json: string, keep: bool = true) =
-  c.add_sample_from_refcomp(name, refcomp_json, true)
-
 router app:
   get "/info":
     resp %*{ "name": c.name,
              "reference_name": c.reference_name,
              "reference_sequence_length": c.reference_sequence.len,
-             "mask_name": c.mask.name,
-             "mask_positions": c.mask.positions.len,
-             "max_distance": c.settings.max_distance,
-             "max_n_positions": c.settings.max_n_positions,
+             "mask_name": c.mask_name,
+             "mask_positions": c.mask_positions.len,
              "total_mem": getTotalMem(),
              "occupied_mem": getOccupiedMem(),
              "n_samples": c.active_samples.len,
-             "n_neighbour_entries": c.neighbours.len,
              "compile_version": compile_version,
              "compile_time": compile_time
            }
@@ -73,7 +69,6 @@ router app:
 
     check_param "name"
     check_param "sequence"
-    check_param "keep"
 
     let
       name = js["name"].getStr()
@@ -82,35 +77,43 @@ router app:
     if c.all_sample_indexes.contains(name):
       resp Http200, "Sample " & name & " already exists"
 
-    c.add_sample(name, sequence, true)
+    c.add_sample(name, sequence)
     resp Http201, "Added " & name
 
   post "/add_sample_from_refcomp":
     let
       js = parseJson(request.body)
+
+    check_param "name"
+    check_param "refcomp"
+
+    let
       name = js["name"].getStr()
-      refcomp = js["refcomp"].getStr()
+      refcomp_json = js["refcomp"].getStr()
 
     if c.all_sample_indexes.contains(name):
       resp Http200, "Sample " & name & " already exists"
 
-    add_sample_from_refcomp(name, refcomp, true)
+    c.add_sample_from_refcomp(name, refcomp_json)
     resp Http201, "Added " & name
 
-  get "/neighbours/@name":
+  get "/neighbours/@name/@distance?":
     if not c.all_sample_indexes.contains(@"name"):
       resp Http404, "Sample " & @"name" & " doesn't exist"
 
+    let distance =
+      if @"distance" == "":
+        default_max_distance
+      else:
+        parseInt(@"distance")
+
     let
-      ns = c.get_neighbours(@"name")
+      ns = c.get_neighbours(@"name", distance)
     var
       ret = newJArray()
     for n in ns:
       ret.add(%*[n[0], $n[1]])
     resp ret
-
-  get "/process_times":
-    resp %*(c.process_times)
 
 proc main(bind_host: string = "0.0.0.0",
           bind_port: int = 5000,
@@ -125,11 +128,10 @@ proc main(bind_host: string = "0.0.0.0",
 
   let
     (_, refseq) = parse_fasta_file(reference_filepath)
-    mask = new_Mask(mask_name, readFile(mask_filepath))
+    mask_positions = load_mask(readFile(mask_filepath))
 
-  echo mask.positions.len
-  c = new_CatWalk(instance_name, reference_name, refseq, mask)
-  c.settings.max_distance = max_distance
+  c = new_CatWalk(instance_name, reference_name, refseq, mask_name, mask_positions)
+  default_max_distance = max_distance
 
   var
     port = bind_port.Port
