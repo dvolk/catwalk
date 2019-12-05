@@ -3,3 +3,11 @@
 *pycache*
 *.txt
 *.sql
+res/
+txt/
+src/test*
+test*
+utils/old
+cw_server
+cw_client
+cw_webui
