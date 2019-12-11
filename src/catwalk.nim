@@ -135,7 +135,7 @@ proc new_CatWalk*(name: string, reference_name: string, reference_sequence: stri
   result.settings.max_distance = 20
   result.settings.max_n_positions = 130000
 
-proc process_neighbours(c: var CatWalk, sample1: var Sample, sample1_index: int) =
+proc process_neighbours(c: var CatWalk, sample1: Sample, sample1_index: int): seq[(int, int)] =
   if sample1.status != Ok:
     return
   for sample2_index in c.active_samples.keys:
@@ -148,12 +148,7 @@ proc process_neighbours(c: var CatWalk, sample1: var Sample, sample1_index: int)
     let
       d = count_diff2(sample1.diffsets, sample2.diffsets, sample1.n_positions, sample2.n_positions, c.settings.max_distance)
     if d <= c.settings.max_distance:
-      if not c.neighbours.contains(sample1_index):
-        c.neighbours[sample1_index] = newSeqOfCap[array[2, int]](16)
-      c.neighbours[sample1_index].add([sample2_index, d])
-      if not c.neighbours.contains(sample2_index):
-        c.neighbours[sample2_index] = newSeqOfCap[array[2, int]](16)
-      c.neighbours[sample2_index].add([sample1_index, d])
+      result.add((sample2_index, d))
 
 proc add_sample*(c: var CatWalk, name: string, sequence: string, keep: bool) =
   var
@@ -165,10 +160,6 @@ proc add_sample*(c: var CatWalk, name: string, sequence: string, keep: bool) =
 
   if keep:
     c.active_samples[sample_index] = sample
-
-  let time1 = cpuTime()
-  c.process_neighbours(sample, sample_index)
-  c.process_times.add(cpuTime() - time1)
 
 proc add_sample_from_refcomp*(c: var CatWalk, name: string, refcomp_json: string, keep: bool) =
   let
@@ -194,16 +185,14 @@ proc add_sample_from_refcomp*(c: var CatWalk, name: string, refcomp_json: string
   if keep:
     c.active_samples[sample_index] = sample
 
-  let time1 = cpuTime()
-  c.process_neighbours(sample, sample_index)
-  c.process_times.add(cpuTime() - time1)
-
-proc get_neighbours*(c: CatWalk, sample_name: string) : seq[(string, int)] =
+proc get_neighbours*(c: var CatWalk, sample_name: string) : seq[(string, int)] =
+  let
+    sample_index = c.all_sample_indexes[sample_name]
+    sample = c.active_samples[sample_index]
+    neighbours = c.process_neighbours(sample, sample_index)
   result = @[]
-  let sample_index = c.all_sample_indexes[sample_name]
-  if sample_index in c.neighbours:
-    for (neighbour_index, distance) in c.neighbours[sample_index]:
-      result.add((c.all_sample_names[neighbour_index], distance))
+  for (neighbour_index, distance) in neighbours:
+    result.add((c.all_sample_names[neighbour_index], distance))
 
 #
 # test
