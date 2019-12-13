@@ -35,7 +35,6 @@ router app:
              "total_mem": getTotalMem(),
              "occupied_mem": getOccupiedMem(),
              "n_samples": c.active_samples.len,
-             "n_neighbour_entries": c.neighbours.len,
              "compile_version": compile_version,
              "compile_time": compile_time
            }
@@ -97,20 +96,18 @@ router app:
     add_sample_from_refcomp(name, refcomp, true)
     resp Http201, "Added " & name
 
-  get "/neighbours/@name":
+  get "/neighbours/@name/@distance":
     if not c.all_sample_indexes.contains(@"name"):
       resp Http404, "Sample " & @"name" & " doesn't exist"
 
     let
-      ns = c.get_neighbours(@"name")
+      distance = @"distance".parseInt
+      ns = c.get_neighbours(@"name", distance)
     var
       ret = newJArray()
     for n in ns:
       ret.add(%*[n[0], $n[1]])
     resp ret
-
-  get "/process_times":
-    resp %*(c.process_times)
 
 proc main(bind_host: string = "0.0.0.0",
           bind_port: int = 5000,

@@ -40,8 +40,6 @@ type
     active_samples: Table[int, Sample]
     all_sample_indexes: Table[string, int]
     all_sample_names: Table[int, string]
-    neighbours: Table[int, seq[array[2, int]]]
-    process_times: seq[float]
 
 #
 # CompressedSequence
@@ -135,7 +133,7 @@ proc new_CatWalk*(name: string, reference_name: string, reference_sequence: stri
   result.settings.max_distance = 20
   result.settings.max_n_positions = 130000
 
-proc process_neighbours(c: var CatWalk, sample1: Sample, sample1_index: int): seq[(int, int)] =
+proc process_neighbours(c: var CatWalk, sample1: Sample, sample1_index: int, distance: int): seq[(int, int)] =
   if sample1.status != Ok:
     return
   for sample2_index in c.active_samples.keys:
@@ -146,8 +144,8 @@ proc process_neighbours(c: var CatWalk, sample1: Sample, sample1_index: int): se
     if sample2.status != Ok:
       continue
     let
-      d = count_diff2(sample1.diffsets, sample2.diffsets, sample1.n_positions, sample2.n_positions, c.settings.max_distance)
-    if d <= c.settings.max_distance:
+      d = count_diff2(sample1.diffsets, sample2.diffsets, sample1.n_positions, sample2.n_positions, distance)
+    if d <= distance:
       result.add((sample2_index, d))
 
 proc add_sample*(c: var CatWalk, name: string, sequence: string, keep: bool) =
@@ -185,11 +183,16 @@ proc add_sample_from_refcomp*(c: var CatWalk, name: string, refcomp_json: string
   if keep:
     c.active_samples[sample_index] = sample
 
-proc get_neighbours*(c: var CatWalk, sample_name: string) : seq[(string, int)] =
+proc get_neighbours*(c: var CatWalk, sample_name: string, distance: int) : seq[(string, int)] =
+  let time1 = cpuTime()
   let
     sample_index = c.all_sample_indexes[sample_name]
     sample = c.active_samples[sample_index]
-    neighbours = c.process_neighbours(sample, sample_index)
+    neighbours = c.process_neighbours(sample, sample_index, distance)
+  let dt = cpuTime() - time1
+  let sam_num = c.active_samples.len
+  echo "Performed " & $sam_num & " distance " & $distance & " comparisons on sample \"" & sample_name & "\" in " & $dt & " seconds (~" & $((1.0 / (dt.float32 / sam_num.float32)) / 1000).int & "k per second)"
+
   result = @[]
   for (neighbour_index, distance) in neighbours:
     result.add((c.all_sample_names[neighbour_index], distance))
