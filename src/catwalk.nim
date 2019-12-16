@@ -207,17 +207,18 @@ when isMainModule:
   var
     c = new_CatWalk("testcw", "testref", rs, mask)
 
-  c.settings.max_distance = 50
-  c.settings.max_n_positions = 2
-
   c.add_sample("s0", "AAACGT", true)
   c.add_sample("s1", "AAACGT", true)
   c.add_sample("s2", "AAACGC", true)
 
-  echo c.active_samples
-  echo c.all_sample_indexes
-  echo c.all_sample_names
-  echo c.neighbours
-  # assert $c.neighbours == """{1: @[(0, 4), (0, 4), (3, 2), (4, 4), (3, 2), (4, 4)], 3: @[(0, 4), (1, 2), (0, 4), (1, 2), (4, 3), (4, 3)], 4: @[(0, 1), (1, 4), (3, 3), (0, 1), (1, 4), (3, 3)], 0: @[(1, 4), (3, 4), (4, 1), (1, 4), (3, 4), (4, 1)]}"""
+  assert c.get_neighbours("s0", -1) == []
+  assert c.get_neighbours("s0", 0) == [("s1", 0)]
+  assert c.get_neighbours("s0", 10) == [("s1", 0), ("s2", 1)]
+
+  c.add_sample_from_refcomp("s3", """{"A": [], "C": [], "G": [], "T": [], "N": []}""", true)
+
+  assert c.get_neighbours("s3", 10) == [("s1", 0),
+                                        ("s2", 1),
+                                        ("s0", 0)]
 
   echo "Tests passed."
