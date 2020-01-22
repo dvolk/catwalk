@@ -14,17 +14,17 @@ def cw_all_guids(cw_host, cw_port):
     xs = requests.get(f"http://{cw_host}:{cw_port}/list_samples").json()
     return xs
 
-def cw_neighbours(cw_host, cw_port, guid):
-    xs = requests.get(f"http://{cw_host}:{cw_port}/neighbours/{guid}").json()
+def cw_neighbours(cw_host, cw_port, guid, max_distance):
+    xs = requests.get(f"http://{cw_host}:{cw_port}/neighbours/{guid}/{max_distance}").json()
     return [[g, int(d)] for [g, d] in xs]
 
-def cwn(cw_host='localhost', cw_port=5000):
+def cwn(max_distance, cw_host='localhost', cw_port=5000):
     '''
     print neighbours for all samples from catwalk
     '''
     out = dict()
     for guid in cw_all_guids(cw_host, cw_port):
-        out[guid] = cw_neighbours(cw_host, cw_port, guid)
+        out[guid] = cw_neighbours(cw_host, cw_port, guid, max_distance)
     print(json.dumps(out))
 
 def fn3_all_guids(fn3_host, fn3_port):

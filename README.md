@@ -93,11 +93,21 @@ A script that can take dumps from `cw_client process_times` and draw graphs like
 Get all neighbours from different relateness services and compare them. Useful for
 comparing identical datasets
 
-## TODO
+### utils/clusters.py
 
-- persistence with database
-- more tests
-- sequence deduplication
+Use networkx to create a cluster graph
+
+#### Example: making a cluster graph png
+
+Add your samples to catwalk and run:
+
+```
+python3 compare_neighbours.py cwn 12 > example.txt
+python3 clusters.py example.txt 12
+sfdp example.dot -Tpng -o example.png
+```
+
+This creates a cluster graph for SNP distance 12
 
 ## References
 
