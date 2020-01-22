@@ -32,7 +32,6 @@
       <li>Mask: ${info["mask_name"].getStr()}</li>
       <li>Maximum distance: ${info["max_distance"]}</li>
       <li>Samples: ${info["n_samples"]}</li>
-      <li>Neighbour entries: ${info["n_neighbour_entries"]}</li>
       <li>Memory used: ${(info["occupied_mem"].getInt() / 1_000_000).int} mb</li>
     </ul>
     <h3>Samples ($i - $j)</h3>
