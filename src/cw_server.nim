@@ -112,9 +112,7 @@ router app:
 proc main(bind_host: string = "0.0.0.0",
           bind_port: int = 5000,
           instance_name: string,
-          reference_name: string,
           reference_filepath: string,
-          mask_name: string,
           mask_filepath: string,
           max_distance: int) =
   echo "starting cw_server " & compile_version &
@@ -122,10 +120,10 @@ proc main(bind_host: string = "0.0.0.0",
 
   let
     (_, refseq) = parse_fasta_file(reference_filepath)
-    mask = new_Mask(mask_name, readFile(mask_filepath))
+    mask = new_Mask(mask_filepath, readFile(mask_filepath))
 
   echo mask.positions.len
-  c = new_CatWalk(instance_name, reference_name, refseq, mask)
+  c = new_CatWalk(instance_name, reference_filepath, refseq, mask)
   c.settings.max_distance = max_distance
 
   var
