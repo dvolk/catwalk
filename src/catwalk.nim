@@ -4,6 +4,7 @@ import strutils
 import times
 import json
 import algorithm
+import system
 
 import symdiff
 
@@ -86,7 +87,7 @@ proc new_Sample*(): Sample =
 proc is_n_position(c: char): bool {.inline.} =
   c != 'A' and c != 'C' and c != 'G' and c != 'T'
 
-proc reference_compress(sample_sequence: string, ref_sequence: string, mask: Mask, max_n_positions: int): Sample =
+proc reference_compress*(sample_sequence: string, ref_sequence: string, mask: Mask, max_n_positions: int): Sample =
   var
     sample = new_Sample()
 
@@ -148,7 +149,24 @@ proc process_neighbours(c: var CatWalk, sample1: Sample, sample1_index: int, dis
     if d <= distance:
       result.add((sample2_index, d))
 
+proc get_neighbours*(c: var CatWalk, sample_name: string, distance: int) : seq[(string, int)] =
+  let time1 = cpuTime()
+  let
+    sample_index = c.all_sample_indexes[sample_name]
+    sample = c.active_samples[sample_index]
+    neighbours = c.process_neighbours(sample, sample_index, distance)
+  let dt = cpuTime() - time1
+  let sam_num = c.active_samples.len
+  echo "Performed " & $sam_num & " distance " & $distance & " comparisons on sample \"" & sample_name & "\" in " & $dt & " seconds (~" & $((1.0 / (dt.float32 / sam_num.float32)) / 1000).int & "k per second)"
+
+  result = @[]
+  for (neighbour_index, distance) in neighbours:
+    result.add((c.all_sample_names[neighbour_index], distance))
+
+let measure = false
+
 proc add_sample*(c: var CatWalk, name: string, sequence: string, keep: bool) =
+  let time1 = cpuTime()
   var
     sample = reference_compress(sequence, c.reference_sequence, c.mask, c.settings.max_n_positions)
 
@@ -158,6 +176,17 @@ proc add_sample*(c: var CatWalk, name: string, sequence: string, keep: bool) =
 
   if keep:
     c.active_samples[sample_index] = sample
+
+  if measure:
+    let l = len(c.all_sample_indexes)
+    if (l < 1000 and l %% 100 == 0) or l %% 1000 == 0:
+      let
+        dt1 = cpuTime() - time1
+        time2 = cpuTime()
+        n = len(c.get_neighbours(c.all_sample_names[0], 20))
+        dt2 = cpuTime() - time2
+        mem = getOccupiedMem()
+      echo $l & " " & $dt1 & " " & $dt2 & " " & $mem & " " & $n
 
 proc add_sample_from_refcomp*(c: var CatWalk, name: string, refcomp_json: string, keep: bool) =
   let
@@ -182,20 +211,6 @@ proc add_sample_from_refcomp*(c: var CatWalk, name: string, refcomp_json: string
 
   if keep:
     c.active_samples[sample_index] = sample
-
-proc get_neighbours*(c: var CatWalk, sample_name: string, distance: int) : seq[(string, int)] =
-  let time1 = cpuTime()
-  let
-    sample_index = c.all_sample_indexes[sample_name]
-    sample = c.active_samples[sample_index]
-    neighbours = c.process_neighbours(sample, sample_index, distance)
-  let dt = cpuTime() - time1
-  let sam_num = c.active_samples.len
-  echo "Performed " & $sam_num & " distance " & $distance & " comparisons on sample \"" & sample_name & "\" in " & $dt & " seconds (~" & $((1.0 / (dt.float32 / sam_num.float32)) / 1000).int & "k per second)"
-
-  result = @[]
-  for (neighbour_index, distance) in neighbours:
-    result.add((c.all_sample_names[neighbour_index], distance))
 
 #
 # test

@@ -4,6 +4,8 @@ import intsets
 import strutils
 import marshal
 import system
+import os
+import sequtils
 
 import catwalk
 import fasta
@@ -16,6 +18,7 @@ var c: CatWalk
 const compile_version = gorge "git describe --tags --always --dirty"
 const compile_time = gorge "date --rfc-3339=seconds"
 
+
 template check_param(p: string) =
   if not js.contains(p):
     resp "Missing parameter: " & p
@@ -23,21 +26,41 @@ template check_param(p: string) =
 proc add_sample_from_refcomp(name: string, refcomp_json: string, keep: bool = true) =
   c.add_sample_from_refcomp(name, refcomp_json, true)
 
+var n_pos_buf: seq[int]
+#
+# write sample reference compressed sequence to a file instance_name/sample_name
+#
+proc save_sample_refcomp(name: string) =
+  if not existsDir(c.name):
+    createDir(c.name)
+  let s = c.active_samples[c.all_sample_indexes[name]]
+  n_pos_buf.setLen(0)
+  for x in s.n_positions:
+    n_pos_buf.insert(x)
+  writeFile(c.name & "/" & name, $(%*{ "N": n_pos_buf,
+                                       "A": s.diffsets[0],
+                                       "C": s.diffsets[1],
+                                       "G": s.diffsets[2],
+                                       "T": s.diffsets[3] }))
+
+proc route_info(): JsonNode =
+  %*{ "name": c.name,
+      "reference_name": c.reference_name,
+      "reference_sequence_length": c.reference_sequence.len,
+      "mask_name": c.mask.name,
+      "mask_positions": c.mask.positions.len,
+      "max_distance": c.settings.max_distance,
+      "max_n_positions": c.settings.max_n_positions,
+      "total_mem": getTotalMem(),
+      "occupied_mem": getOccupiedMem(),
+      "n_samples": c.active_samples.len,
+      "compile_version": compile_version,
+      "compile_time": compile_time
+    }
+
 router app:
   get "/info":
-    resp %*{ "name": c.name,
-             "reference_name": c.reference_name,
-             "reference_sequence_length": c.reference_sequence.len,
-             "mask_name": c.mask.name,
-             "mask_positions": c.mask.positions.len,
-             "max_distance": c.settings.max_distance,
-             "max_n_positions": c.settings.max_n_positions,
-             "total_mem": getTotalMem(),
-             "occupied_mem": getOccupiedMem(),
-             "n_samples": c.active_samples.len,
-             "compile_version": compile_version,
-             "compile_time": compile_time
-           }
+    resp route_info()
 
   get "/debug":
     resp %*($c)
@@ -82,6 +105,17 @@ router app:
       resp Http200, "Sample " & name & " already exists"
 
     c.add_sample(name, sequence, true)
+
+    let serialize = true
+    if serialize:
+      save_sample_refcomp(name)
+
+
+    #for i in 1..9:
+    #  var sq: string
+    #  deepCopy sq, sequence
+    #  c.add_sample(name & "-" & $i, sq, true)
+
     resp Http201, "Added " & name
 
   post "/add_sample_from_refcomp":
@@ -109,6 +143,18 @@ router app:
       ret.add(%*[n[0], $n[1]])
     resp ret
 
+#
+# load all compressed sequences saved by save_sample_refcomp
+#
+proc load_instance_samples() =
+  if existsDir(c.name):
+    var i = 0
+    for kind, path in walkDir(c.name):
+      if i %% 1000 == 0:
+        echo "loaded " & $i & " cached files"
+      i = i + 1
+      c.add_sample_from_refcomp(extractFilename(path), readFile(path), true)
+
 proc main(bind_host: string = "0.0.0.0",
           bind_port: int = 5000,
           instance_name: string,
@@ -125,6 +171,8 @@ proc main(bind_host: string = "0.0.0.0",
   echo mask.positions.len
   c = new_CatWalk(instance_name, reference_filepath, refseq, mask)
   c.settings.max_distance = max_distance
+
+  load_instance_samples()
 
   var
     port = bind_port.Port
