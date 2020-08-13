@@ -10,7 +10,7 @@ It is based on the design of findNeighbour3 by David Wyllie.
 
 - nim >= 1.0.0
 
-### Installing nim
+### Installing nim (on Linux)
 
 The following assumes you're putting nim in the home directory, but you can put it anywhere and then edit the paths below
 
@@ -22,13 +22,13 @@ sudo apt install gcc
 2. Download and extract nim:
 ```
 cd
-wget https://nim-lang.org/download/nim-1.0.2-linux_x64.tar.xz
-tar xf nim-1.0.2-linux_x64.tar.xz
+wget https://nim-lang.org/download/nim-1.2.6-linux_x64.tar.xz
+tar xf nim-1.2.6-linux_x64.tar.xz
 ```
 
 3. to be able to run nim from any directory, add it to the `PATH` variable (replace yourusername with your username):
 ```
-echo 'PATH=$PATH:/home/yourusername/nim-1.0.2/bin' >> .bashrc
+echo 'PATH=$PATH:/home/yourusername/nim-1.2.6/bin' >> .bashrc
 ```
 
 4. When you run `nimble install` (the nim package manager), it puts binaries into `~/.nimble/bin`, so add that too (replace yourusername with your username):
@@ -43,7 +43,7 @@ source ~/.bashrc
 6. Confirm it's working:
 ```
 $ nim -v
-Nim Compiler Version 1.0.2 [Linux: amd64]
+Nim Compiler Version 1.2.6 [Linux: amd64]
 ```
 
 ## Building
@@ -52,14 +52,12 @@ in the catwalk directory, run:
 
     nimble build -d:release -d:danger 
 
-This creates three binaries: `cw_server`, `cw_client` and `cw_webui`
+This creates four binaries: `cw_server`, `cw_client`, `cw_webui`, `refcompress`
 
 ## Starting cw_server (example)
 
     ./cw_server --instance-name=test \
-                --reference-name=test \
                 --reference-filepath=res/references/R00000039.fa \
-                --mask-name=TB-exclude-adaptive.txt \
                 --mask-filepath=res/masks/TB-exclude-adaptive.txt \
                 --max_distance=20
 
@@ -74,6 +72,12 @@ use something like `find`. e.g.:
     ./cw_webui
 
 Open browser at `http://localhost:5001`
+
+## Cache
+
+When you add samples to catwalk, a JSON string of the reference compressed sequence is saved to the `instance-name` directory. When you restart catwalk with that instance name, it will load these sequences automatically. This is much faster than re-adding them every time, and the files are smaller than the original fasta files.
+
+We also provide the `refcompress` binary, which is a program to produce these reference compressed sequences. This enables the reference compression to be done in parallel (e.g. with GNU parallel) or integrated into pipelines.
 
 ## Utils
 
@@ -98,6 +102,8 @@ comparing identical datasets
 Use networkx to create a cluster graph
 
 #### Example: making a cluster graph png
+
+You will need a running catwalk server and graphviz installed
 
 Add your samples to catwalk and run:
 
