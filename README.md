@@ -87,12 +87,6 @@ We also provide the `refcompress` binary, which is a program to produce these re
 Given a reference, a mask file and two samples, check the difference between
 the samples in different ways.
 
-### utils/plot_array.py
-
-A script that can take dumps from `cw_client process_times` and draw graphs like so:
-
-![](https://gitea.mmmoxford.uk/dvolk/catwalk/raw/branch/master/doc/perf.png)
-
 ### utils/compare_neighbours.py
 
 Get all neighbours from different relateness services and compare them. Useful for
