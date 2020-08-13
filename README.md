@@ -2,9 +2,10 @@
 
 ## Description
 
-CatWalk is a service where you insert bacterial fasta files and then query relationships between them.
+CatWalk is a memory-efficient and ultra-fast web server to compute pairwise single nucleotide polymorphism (SNP) distance matrix written in Nim language.
 
-It is based on the design of findNeighbour3 by David Wyllie.
+The memory usage is 160kb per sequence for a pathogen of 4M bases, therefore computing 1M pairwise SNP distance of pathogen sequences of this kind can be achieved with a server of 16G memory. Catwalk can compare 1.2M sequences within a second using one core. It takes less than one second to get a neighborhood sequences of 20 SNPs.
+
 
 ## Requirements
 
@@ -116,6 +117,10 @@ sfdp example.dot -Tpng -o example.png
 This creates a cluster graph for SNP distance 12
 
 ## References
+
+Catwalk is motivated by BugMat and FindNeighbour.
+
+Mazariegos-Canellas, O., Do, T., Peto, T. et al. BugMat and FindNeighbour: command line and server applications for investigating bacterial relatedness. BMC Bioinformatics 18, 477 (2017) doi:10.1186/s12859-017-1907-2
 
 https://github.com/davidhwyllie/findNeighbour
 
