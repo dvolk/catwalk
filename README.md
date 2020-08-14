@@ -108,16 +108,12 @@ python3 clusters.py example.txt 12
 sfdp example.dot -Tpng -o example.png
 ```
 
-This creates a cluster graph for SNP distance 12
+This creates a cluster graph for SNP distance 12, see [an output example](https://gitea.mmmoxford.uk/dvolk/catwalk/raw/branch/master/doc/cluster-example.png).
 
 ## References
 
 Catwalk is motivated by BugMat and FindNeighbour.
 
-Mazariegos-Canellas, O., Do, T., Peto, T. et al. BugMat and FindNeighbour: command line and server applications for investigating bacterial relatedness. BMC Bioinformatics 18, 477 (2017) doi:10.1186/s12859-017-1907-2
+Mazariegos-Canellas, O., Do, T., Peto, T. et al. BugMat and FindNeighbour: command line and server applications for investigating bacterial relatedness. BMC Bioinformatics 18, 477 (2017) [doi.org/10.1186/s12859-017-1907-2](https://doi.org/10.1186/s12859-017-1907-2)
 
-https://github.com/davidhwyllie/findNeighbour
-
-https://github.com/davidhwyllie/findNeighbour2
-
-https://github.com/davidhwyllie/findNeighbour3
+[Repository of Bugmat and Findneighbour](https://github.com/davidhwyllie/findNeighbour)
