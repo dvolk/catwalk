@@ -106,10 +106,10 @@ router app:
 
     c.add_sample(name, sequence, true)
 
-    let serialize = true
-    if serialize:
+    when defined(no_serialisation):
+      echo "skipping saving instance file because this catwalk was built with -d:no_serialisation"
+    when not defined(no_serialisation):
       save_sample_refcomp(name)
-
 
     #for i in 1..9:
     #  var sq: string
@@ -172,7 +172,16 @@ proc main(bind_host: string = "0.0.0.0",
   c = new_CatWalk(instance_name, reference_filepath, refseq, mask)
   c.settings.max_distance = max_distance
 
-  load_instance_samples()
+  when defined(no_serialisation):
+    echo "skipping loading instance files because this catwalk was built with -d:no_serialisation"
+  when not defined(no_serialisation):
+    echo "loading instance files. To skip this build with -d:no_serialisation"
+    load_instance_samples()
+
+  when not defined(release):
+    echo "this catwalk was not built with -d:release. We recommend using -d:release for better performance"
+  when not defined(danger):
+    echo "this catwalk was not built with -d:danger. We recommend using -d:danger for better performance"
 
   var
     port = bind_port.Port
