@@ -1,4 +1,5 @@
 import json
+import jsony
 import tables
 import intsets
 import strutils
@@ -26,6 +27,9 @@ template check_param(p: string) =
 proc add_sample_from_refcomp(name: string, refcomp_json: string, keep: bool = true) =
   c.add_sample_from_refcomp(name, refcomp_json, true)
 
+proc add_samples_from_refcomp_array(names: string, refcomps: string) =
+  c.add_samples_from_refcomp_array(names, refcomps)
+
 var n_pos_buf: seq[int]
 #
 # write sample reference compressed sequence to a file instance_name/sample_name
@@ -37,7 +41,8 @@ proc save_sample_refcomp(name: string) =
   n_pos_buf.setLen(0)
   for x in s.n_positions:
     n_pos_buf.insert(x)
-  writeFile(c.name & "/" & name, $(%*{ "N": n_pos_buf,
+  writeFile(c.name & "/" & name, $(%*{ "name": name,
+                                       "N": n_pos_buf,
                                        "A": s.diffsets[0],
                                        "C": s.diffsets[1],
                                        "G": s.diffsets[2],
@@ -130,6 +135,15 @@ router app:
     add_sample_from_refcomp(name, refcomp, true)
     resp Http201, "Added " & name
 
+  post "/add_sample_from_refcomp_array":
+    let
+      js = request.body.fromJson(Table[string, string])
+      names = js["names"]
+      refcomps = js["refcomps"]
+
+    add_samples_from_refcomp_array(names, refcomps)
+    resp Http201, "OK"
+
   get "/neighbours/@name/@distance":
     if not c.all_sample_indexes.contains(@"name"):
       resp Http404, "Sample " & @"name" & " doesn't exist"
@@ -153,7 +167,7 @@ proc load_instance_samples() =
       if i %% 1000 == 0:
         echo "loaded " & $i & " cached files"
       i = i + 1
-      c.add_sample_from_refcomp(extractFilename(path), readFile(path), true)
+      add_samples_from_refcomp_array("[\"" & extractFilename(path) & "\"]", "[\"" & readFile(path) & "\"]")
 
 proc main(bind_host: string = "0.0.0.0",
           bind_port: int = 5000,
