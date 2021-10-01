@@ -14,3 +14,4 @@ bin           = @["cw_server", "cw_client", "cw_webui", "refcompress"]
 requires "nim >= 1.0.0"
 requires "jester >= 0.4.3"
 requires "cligen >= 0.9.38"
+requires "jsony"
