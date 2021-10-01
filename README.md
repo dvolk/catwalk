@@ -23,13 +23,13 @@ sudo apt install gcc
 2. Download and extract nim:
 ```
 cd
-wget https://nim-lang.org/download/nim-1.2.6-linux_x64.tar.xz
-tar xf nim-1.2.6-linux_x64.tar.xz
+wget https://nim-lang.org/download/nim-1.4.8-linux_x64.tar.xz
+tar xf nim-1.4.8-linux_x64.tar.xz
 ```
 
 3. to be able to run nim from any directory, add it to the `PATH` variable (replace yourusername with your username):
 ```
-echo 'PATH=$PATH:/home/yourusername/nim-1.2.6/bin' >> .bashrc
+echo 'PATH=$PATH:/home/yourusername/nim-1.4.8/bin' >> .bashrc
 ```
 
 4. When you run `nimble install` (the nim package manager), it puts binaries into `~/.nimble/bin`, so add that too (replace yourusername with your username):
@@ -44,14 +44,14 @@ source ~/.bashrc
 6. Confirm it's working:
 ```
 $ nim -v
-Nim Compiler Version 1.2.6 [Linux: amd64]
+Nim Compiler Version 1.4.8 [Linux: amd64]
 ```
 
 ## Building
 
 in the catwalk directory, run:
 
-    nimble build -d:release -d:danger 
+    nimble build -d:release -d:danger
 
 This creates four binaries: `cw_server`, `cw_client`, `cw_webui`, `refcompress`
 
