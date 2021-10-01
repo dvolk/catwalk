@@ -18,6 +18,7 @@ type
     InvalidLength
     TooManyNs
     Ok
+    Removed
 
   Sample* = tuple
     status: SampleStatus
@@ -190,6 +191,14 @@ proc add_sample*(c: var CatWalk, name: string, sequence: string, keep: bool) =
         dt2 = cpuTime() - time2
         mem = getOccupiedMem()
       echo $l & " " & $dt1 & " " & $dt2 & " " & $mem & " " & $n
+
+
+proc remove_sample*(c: var CatWalk, name: string) =
+  let sample_id = c.all_sample_indexes[name]
+  c.active_samples[sample_id].diffsets.empty_compressed_sequence()
+  c.active_samples[sample_id].n_positions = initIntSet()
+  c.active_samples[sample_id].status = Removed
+
 
 proc add_sample_from_refcomp*(c: var CatWalk, name: string, refcomp_json: string, keep: bool) =
   let

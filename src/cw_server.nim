@@ -74,7 +74,8 @@ router app:
     var
       ret = newJArray()
     for k in c.active_samples.keys:
-      ret.add(%*c.all_sample_names[k])
+      if c.active_samples[k].status == Ok:
+        ret.add(%*c.all_sample_names[k])
     resp ret
 
   get "/get_sample/@name":
@@ -93,6 +94,10 @@ router app:
     for k in i..<j:
       r.add(%*c.all_sample_names[k])
     resp %*(r)
+
+  get "/remove_sample/@name":
+    c.remove_sample(@"name")
+    resp Http200, "removed " & @"name"
 
   post "/add_sample":
     let
