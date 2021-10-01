@@ -41,8 +41,7 @@ proc save_sample_refcomp(name: string) =
   n_pos_buf.setLen(0)
   for x in s.n_positions:
     n_pos_buf.insert(x)
-  writeFile(c.name & "/" & name, $(%*{ "name": name,
-                                       "N": n_pos_buf,
+  writeFile(c.name & "/" & name, $(%*{ "N": n_pos_buf,
                                        "A": s.diffsets[0],
                                        "C": s.diffsets[1],
                                        "G": s.diffsets[2],
