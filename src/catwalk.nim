@@ -2,7 +2,7 @@ import tables
 import intsets
 import strutils
 import times
-import json
+import jsony
 import algorithm
 import system
 
@@ -18,6 +18,7 @@ type
     InvalidLength
     TooManyNs
     Ok
+    Removed
 
   Sample* = tuple
     status: SampleStatus
@@ -38,9 +39,9 @@ type
     reference_name: string
     reference_sequence: string
     mask: Mask
-    active_samples: Table[int, Sample]
-    all_sample_indexes: Table[string, int]
-    all_sample_names: Table[int, string]
+    active_samples: TableRef[int, Sample]
+    all_sample_indexes: TableRef[string, int]
+    all_sample_names: TableRef[int, string]
 
 #
 # CompressedSequence
@@ -133,6 +134,9 @@ proc new_CatWalk*(name: string, reference_name: string, reference_sequence: stri
   result.mask = mask
   result.settings.max_distance = 20
   result.settings.max_n_positions = 130000
+  result.active_samples = newTable[int, Sample]()
+  result.all_sample_indexes = newTable[string, int]()
+  result.all_sample_names = newTable[int, string]()
 
 proc process_neighbours(c: var CatWalk, sample1: Sample, sample1_index: int, distance: int): seq[(int, int)] =
   if sample1.status != Ok:
@@ -188,18 +192,25 @@ proc add_sample*(c: var CatWalk, name: string, sequence: string, keep: bool) =
         mem = getOccupiedMem()
       echo $l & " " & $dt1 & " " & $dt2 & " " & $mem & " " & $n
 
+
+proc remove_sample*(c: var CatWalk, name: string) =
+  let sample_id = c.all_sample_indexes[name]
+  c.active_samples[sample_id].diffsets.empty_compressed_sequence()
+  c.active_samples[sample_id].n_positions = initIntSet()
+  c.active_samples[sample_id].status = Removed
+
+
 proc add_sample_from_refcomp*(c: var CatWalk, name: string, refcomp_json: string, keep: bool) =
   let
-    tbl = parseJson(refcomp_json)
+    tbl = refcomp_json.fromJson(Table[string, seq[int]])
   var
     sample = new_Sample()
-
   sample.status = Ok
-  for x in tbl["N"]: sample.n_positions.incl(x.getInt())
-  for x in tbl["A"]: sample.diffsets[0].add(x.getInt())
-  for x in tbl["C"]: sample.diffsets[1].add(x.getInt())
-  for x in tbl["G"]: sample.diffsets[2].add(x.getInt())
-  for x in tbl["T"]: sample.diffsets[3].add(x.getInt())
+  sample.n_positions = toIntSet(tbl["N"])
+  sample.diffsets[0] = tbl["A"]
+  sample.diffsets[1] = tbl["C"]
+  sample.diffsets[2] = tbl["G"]
+  sample.diffsets[3] = tbl["T"]
   sample.diffsets[0].sort()
   sample.diffsets[1].sort()
   sample.diffsets[2].sort()
@@ -211,6 +222,30 @@ proc add_sample_from_refcomp*(c: var CatWalk, name: string, refcomp_json: string
 
   if keep:
     c.active_samples[sample_index] = sample
+
+proc add_samples_from_refcomp_array*(c: var CatWalk, names: string, refcomps: string) =
+  let
+    namesjs = names.fromJson(seq[string])
+    refcompjs = refcomps.fromJson(seq[Table[string, seq[int]]])
+  var i = 0
+  for refcompj in refcompjs:
+    var sample = new_Sample()
+    let name = namesjs[i]
+    sample.status = Ok
+    sample.n_positions = toIntSet(refcompj["N"])
+    sample.diffsets[0] = refcompj["A"]
+    sample.diffsets[1] = refcompj["C"]
+    sample.diffsets[2] = refcompj["G"]
+    sample.diffsets[3] = refcompj["T"]
+    sample.diffsets[0].sort()
+    sample.diffsets[1].sort()
+    sample.diffsets[2].sort()
+    sample.diffsets[3].sort()
+    let sample_index = len(c.all_sample_indexes)
+    c.all_sample_indexes[name] = sample_index
+    c.all_sample_names[sample_index] = name
+    c.active_samples[sample_index] = sample
+    i = i + 1
 
 #
 # test

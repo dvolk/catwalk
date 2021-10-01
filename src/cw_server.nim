@@ -1,4 +1,5 @@
 import json
+import jsony
 import tables
 import intsets
 import strutils
@@ -25,6 +26,9 @@ template check_param(p: string) =
 
 proc add_sample_from_refcomp(name: string, refcomp_json: string, keep: bool = true) =
   c.add_sample_from_refcomp(name, refcomp_json, true)
+
+proc add_samples_from_refcomp_array(names: string, refcomps: string) =
+  c.add_samples_from_refcomp_array(names, refcomps)
 
 var n_pos_buf: seq[int]
 #
@@ -69,7 +73,8 @@ router app:
     var
       ret = newJArray()
     for k in c.active_samples.keys:
-      ret.add(%*c.all_sample_names[k])
+      if c.active_samples[k].status == Ok:
+        ret.add(%*c.all_sample_names[k])
     resp ret
 
   get "/get_sample/@name":
@@ -88,6 +93,10 @@ router app:
     for k in i..<j:
       r.add(%*c.all_sample_names[k])
     resp %*(r)
+
+  get "/remove_sample/@name":
+    c.remove_sample(@"name")
+    resp Http200, "removed " & @"name"
 
   post "/add_sample":
     let
@@ -130,6 +139,15 @@ router app:
     add_sample_from_refcomp(name, refcomp, true)
     resp Http201, "Added " & name
 
+  post "/add_sample_from_refcomp_array":
+    let
+      js = request.body.fromJson(Table[string, string])
+      names = js["names"]
+      refcomps = js["refcomps"]
+
+    add_samples_from_refcomp_array(names, refcomps)
+    resp Http201, "OK"
+
   get "/neighbours/@name/@distance":
     if not c.all_sample_indexes.contains(@"name"):
       resp Http404, "Sample " & @"name" & " doesn't exist"
@@ -154,6 +172,7 @@ proc load_instance_samples() =
         echo "loaded " & $i & " cached files"
       i = i + 1
       c.add_sample_from_refcomp(extractFilename(path), readFile(path), true)
+    echo "loaded " & $i & " cached files"
 
 proc main(bind_host: string = "0.0.0.0",
           bind_port: int = 5000,
