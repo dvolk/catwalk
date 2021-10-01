@@ -172,6 +172,7 @@ proc load_instance_samples() =
         echo "loaded " & $i & " cached files"
       i = i + 1
       c.add_sample_from_refcomp(extractFilename(path), readFile(path), true)
+    echo "loaded " & $i & " cached files"
 
 proc main(bind_host: string = "0.0.0.0",
           bind_port: int = 5000,
