@@ -30,7 +30,7 @@ proc add_sample(fasta_filepath: string, remove_extension=".fasta") =
 
 proc add_samples_from_dir(fasta_dir: string, remove_extension=".fasta") =
   for fasta_filepath in fasta_dir.walkDir():
-    add_sample(fasta_filepath)
+    add_sample(fasta_filepath.path)
 
 proc list_samples() =
   let response = client.request("http://127.0.0.1:5000/list_samples")

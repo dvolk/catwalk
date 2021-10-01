@@ -167,7 +167,7 @@ proc load_instance_samples() =
       if i %% 1000 == 0:
         echo "loaded " & $i & " cached files"
       i = i + 1
-      add_samples_from_refcomp_array("[\"" & extractFilename(path) & "\"]", "[\"" & readFile(path) & "\"]")
+      c.add_sample_from_refcomp(extractFilename(path), readFile(path), true)
 
 proc main(bind_host: string = "0.0.0.0",
           bind_port: int = 5000,
