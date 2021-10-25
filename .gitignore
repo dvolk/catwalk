@@ -6,7 +6,7 @@
 res/
 txt/
 src/test*
-test*
+test-*
 utils/old
 cw_server
 cw_client
