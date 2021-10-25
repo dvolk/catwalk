@@ -11,3 +11,8 @@ utils/old
 cw_server
 cw_client
 cw_webui
+nim*
+.env
+Pipfile.lock
+refcompress
+*out
