@@ -9,7 +9,12 @@ The memory usage is 160kb per sequence for a pathogen of 4M bases, therefore com
 
 ## Requirements
 
-- nim >= 1.0.0
+- nim >= 1.4.0
+
+## Unit tests
+# uses a python virtual environment, runs tests through python client
+pipenv install
+./run_tests.sh
 
 ### Installing nim (on Linux)
 
