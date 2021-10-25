@@ -7,6 +7,7 @@ import marshal
 import system
 import os
 import sequtils
+import strformat
 
 import catwalk
 import fasta
@@ -111,7 +112,10 @@ router app:
       sequence = js["sequence"].getStr()
 
     if c.all_sample_indexes.contains(name):
-      resp Http200, "Sample " & name & " already exists"
+      let index = c.all_sample_indexes[name]
+      let sample = c.active_samples[index]
+      if sample.status == Ok:
+        resp Http200, fmt"Sample {name} already exists (status: {sample.status})"
 
     c.add_sample(name, sequence, true)
 
@@ -125,7 +129,7 @@ router app:
     #  deepCopy sq, sequence
     #  c.add_sample(name & "-" & $i, sq, true)
 
-    resp Http201, "Added " & name
+    resp Http201, fmt"Added {name}"
 
   post "/add_sample_from_refcomp":
     let
@@ -134,7 +138,10 @@ router app:
       refcomp = js["refcomp"].getStr()
 
     if c.all_sample_indexes.contains(name):
-      resp Http200, "Sample " & name & " already exists"
+      let index = c.all_sample_indexes[name]
+      let sample = c.active_samples[index]
+      if sample.status == Ok:
+        resp Http200, fmt"Sample {name} already exists (status: {sample.status})"
 
     add_sample_from_refcomp(name, refcomp, true)
     resp Http201, "Added " & name
