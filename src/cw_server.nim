@@ -29,9 +29,6 @@ template check_param(p: string) =
 proc add_sample_from_refcomp(name: string, refcomp_json: string, keep: bool = true) =
   c.add_sample_from_refcomp(name, refcomp_json, true)
 
-proc add_samples_from_refcomp_array(names: string, refcomps: string) =
-  c.add_samples_from_refcomp_array(names, refcomps)
-
 
 proc add_samples_from_multifasta_singleline(filepath: string) =
   var
@@ -160,15 +157,6 @@ router app:
 
     add_sample_from_refcomp(name, refcomp, true)
     resp Http201, "Added " & name
-
-  post "/add_sample_from_refcomp_array":
-    let
-      js = request.body.fromJson(Table[string, string])
-      names = js["names"]
-      refcomps = js["refcomps"]
-
-    add_samples_from_refcomp_array(names, refcomps)
-    resp Http201, "OK"
 
   # mfsl - multifasta singleline
   # (sequence data on a single line, no line breaks)

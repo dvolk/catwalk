@@ -223,29 +223,6 @@ proc add_sample_from_refcomp*(c: var CatWalk, name: string, refcomp_json: string
   if keep:
     c.active_samples[sample_index] = sample
 
-proc add_samples_from_refcomp_array*(c: var CatWalk, names: string, refcomps: string) =
-  let
-    namesjs = names.fromJson(seq[string])
-    refcompjs = refcomps.fromJson(seq[Table[string, seq[int]]])
-  var i = 0
-  for refcompj in refcompjs:
-    var sample = new_Sample()
-    let name = namesjs[i]
-    sample.status = Ok
-    sample.n_positions = toIntSet(refcompj["N"])
-    sample.diffsets[0] = refcompj["A"]
-    sample.diffsets[1] = refcompj["C"]
-    sample.diffsets[2] = refcompj["G"]
-    sample.diffsets[3] = refcompj["T"]
-    sample.diffsets[0].sort()
-    sample.diffsets[1].sort()
-    sample.diffsets[2].sort()
-    sample.diffsets[3].sort()
-    let sample_index = len(c.all_sample_indexes)
-    c.all_sample_indexes[name] = sample_index
-    c.all_sample_names[sample_index] = name
-    c.active_samples[sample_index] = sample
-    i = i + 1
 
 #
 # test
