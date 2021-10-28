@@ -6,6 +6,7 @@ import strutils
 import marshal
 import system
 import os
+import times
 import sequtils
 import strformat
 
@@ -30,6 +31,20 @@ proc add_sample_from_refcomp(name: string, refcomp_json: string, keep: bool = tr
 
 proc add_samples_from_refcomp_array(names: string, refcomps: string) =
   c.add_samples_from_refcomp_array(names, refcomps)
+
+
+proc add_samples_from_multifasta_singleline(filepath: string) =
+  var
+    i = 0
+    time_now = cpuTime()
+  for (header, sequence) in parse_multifasta_singleline_file(filepath):
+    let my_header = header.replace("/", "_")[1.. header.high]
+    c.add_sample(my_header, sequence, true)
+    if i mod 1000 == 0:
+      echo fmt"added {i} samples"
+    i = i + 1
+  echo fmt"added {i} samples in {cpuTime() - time_now} seconds."
+
 
 var n_pos_buf: seq[int]
 #
@@ -153,6 +168,14 @@ router app:
       refcomps = js["refcomps"]
 
     add_samples_from_refcomp_array(names, refcomps)
+    resp Http201, "OK"
+
+  # mfsl - multifasta singleline
+  # (sequence data on a single line, no line breaks)
+  post "/add_samples_from_mfsl":
+    let js = request.body.fromJson(Table[string, string])
+    let filepath = js["filepath"]
+    add_samples_from_multifasta_singleline(filepath)
     resp Http201, "OK"
 
   get "/neighbours/@name/@distance":
