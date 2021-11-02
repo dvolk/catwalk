@@ -42,6 +42,8 @@ type
     active_samples: TableRef[int, Sample]
     all_sample_indexes: TableRef[string, int]
     all_sample_names: TableRef[int, string]
+    neighbours_times: seq[float]
+
 
 #
 # CompressedSequence
@@ -160,6 +162,7 @@ proc get_neighbours*(c: var CatWalk, sample_name: string, distance: int) : seq[(
     sample = c.active_samples[sample_index]
     neighbours = c.process_neighbours(sample, sample_index, distance)
   let dt = cpuTime() - time1
+  c.neighbours_times.add(dt)
   let sam_num = c.active_samples.len
   echo "Performed " & $sam_num & " distance " & $distance & " comparisons on sample \"" & sample_name & "\" in " & $dt & " seconds (~" & $((1.0 / (dt.float32 / sam_num.float32)) / 1000).int & "k per second)"
 

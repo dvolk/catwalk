@@ -82,6 +82,13 @@ router app:
   get "/debug":
     resp %*($c)
 
+  get "/neighbours_times":
+    resp %*(c.neighbours_times)
+
+  post "/clear_neighbours_times":
+    c.neighbours_times = @[]
+    resp Http200, "ok"
+
   get "/list_samples":
     var
       ret = newJArray()
