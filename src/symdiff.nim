@@ -65,6 +65,14 @@ when isMainModule:
     xs1: seq[int]
     xs2: seq[int]
 
+  is1 = initIntSet()
+  is2 = initIntSet()
+  buf = newSeqOfCap[int](64)
+  xs1 = @[0, 1, 2, 3, 4, 5]
+  xs2 = @[0, 1, 2, 3, 4, 5]
+  sym_diff1(xs1, xs2, buf, is1, is2, 20)
+  assert $buf == "@[]"
+
   # bug1
   is1 = initIntSet()
   is2 = initIntSet()
@@ -80,7 +88,7 @@ when isMainModule:
   xs1 = @[1, 2, 3]
   xs2 = @[]
   sym_diff1(xs1, xs2, buf, is1, is2, 20)
-  assert $buf == "{1, 2, 3}"
+  assert $buf == "@[1, 2, 3]"
 
   is1 = initIntSet()
   is2 = initIntSet()
@@ -88,7 +96,7 @@ when isMainModule:
   xs1 = @[1, 2, 3]
   xs2 = @[1, 2, 3]
   sym_diff1(xs1, xs2, buf, is1, is2, 20)
-  assert $buf == "{}"
+  assert $buf == "@[]"
 
   is1 = initIntSet()
   is2 = initIntSet()
@@ -96,7 +104,7 @@ when isMainModule:
   xs1 = @[1, 2]
   xs2 = @[1, 2, 3]
   sym_diff1(xs1, xs2, buf, is1, is2, 20)
-  assert $buf == "{3}"
+  assert $buf == "@[3]"
 
   is1 = initIntSet()
   is2 = initIntSet()
@@ -104,7 +112,7 @@ when isMainModule:
   xs1 = @[1, 2, 3]
   xs2 = @[2, 3]
   sym_diff1(xs1, xs2, buf, is1, is2, 20)
-  assert $buf == "{1}"
+  assert $buf == "@[1]"
 
   is1 = initIntSet()
   is2 = initIntSet()
@@ -112,7 +120,7 @@ when isMainModule:
   xs1 = @[1, 2, 3, 4]
   xs2 = @[2, 3]
   sym_diff1(xs1, xs2, buf, is1, is2, 20)
-  assert $buf == "{1, 4}"
+  assert $buf == "@[1, 4]"
 
   is1 = initIntSet()
   is2 = initIntSet()
@@ -120,7 +128,7 @@ when isMainModule:
   xs1 = @[2, 3]
   xs2 = @[1, 2, 3, 4]
   sym_diff1(xs1, xs2, buf, is1, is2, 20)
-  assert $buf == "{1, 4}"
+  assert $buf == "@[1, 4]"
 
   is1 = initIntSet()
   is2 = initIntSet()
@@ -128,7 +136,7 @@ when isMainModule:
   xs1 = @[]
   xs2 = @[]
   sym_diff1(xs1, xs2, buf, is1, is2, 20)
-  assert $buf == "{}"
+  assert $buf == "@[]"
 
   is1 = initIntSet()
   is2 = initIntSet()
@@ -137,7 +145,7 @@ when isMainModule:
   xs1 = @[1, 2, 3]
   xs2 = @[]
   sym_diff1(xs1, xs2, buf, is1, is2, 20)
-  assert $buf == "{2, 3}"
+  assert $buf == "@[2, 3]"
 
   is1 = initIntSet()
   is2 = initIntSet()
@@ -146,7 +154,7 @@ when isMainModule:
   xs1 = @[]
   xs2 = @[1, 2, 3]
   sym_diff1(xs1, xs2, buf, is1, is2, 20)
-  assert $buf == "{2, 3}"
+  assert $buf == "@[2, 3]"
 
   is1 = initIntSet()
   is2 = initIntSet()
@@ -155,7 +163,7 @@ when isMainModule:
   xs1 = @[3, 4]
   xs2 = @[1, 2, 3]
   sym_diff1(xs1, xs2, buf, is1, is2, 20)
-  assert $buf == "{2, 4}"
+  assert $buf == "@[2, 4]"
 
   is1 = initIntSet()
   is2 = initIntSet()
@@ -164,7 +172,7 @@ when isMainModule:
   xs1 = @[1, 2, 3]
   xs2 = @[3, 4]
   sym_diff1(xs1, xs2, buf, is1, is2, 20)
-  assert $buf == "{2, 4}"
+  assert $buf == "@[2, 4]"
 
   is1 = initIntSet()
   is2 = initIntSet()
@@ -178,7 +186,7 @@ when isMainModule:
   xs1 = @[1, 2, 3]
   xs2 = @[4, 5, 6]
   sym_diff1(xs1, xs2, buf, is1, is2, 20)
-  assert $buf == "{}"
+  assert $buf == "@[]"
 
   is1 = initIntSet()
   is2 = initIntSet()
@@ -190,7 +198,7 @@ when isMainModule:
   xs1 = @[1, 2, 3]
   xs2 = @[4, 5, 6]
   sym_diff1(xs1, xs2, buf, is1, is2, 20)
-  assert $buf == "{3, 4}"
+  assert $buf == "@[3, 4]"
 
   is1 = initIntSet()
   is2 = initIntSet()
@@ -199,11 +207,11 @@ when isMainModule:
   is1.incl(5)
   is1.incl(6)
   buf = newSeqOfCap[int](64)
-  buf.incl(0)
-  buf.incl(10)
+  buf.add(0)
+  buf.add(10)
   xs1 = @[1, 2, 3]
   xs2 = @[4, 5, 6]
   sym_diff1(xs1, xs2, buf, is1, is2, 20)
-  assert $buf == "{0, 10, 3, 4}"
+  assert $buf == "@[0, 10, 3, 4]"
 
   echo "Tests passed."
