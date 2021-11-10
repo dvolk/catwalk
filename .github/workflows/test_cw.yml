@@ -1,0 +1,41 @@
+# from findneighbour4
+
+name: Test catwalk with latest nim
+on:
+  workflow_dispatch:
+    inputs:
+      tags:
+        description: 'Test catwalk with latest nim'
+  push:
+    branches:
+    - '*'
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v2
+    - name: Setup Nim
+      run: |
+        wget https://nim-lang.org/download/nim-1.6.0-linux_x64.tar.xz
+        tar -xf nim-1.6.0-linux_x64.tar.xz
+        NIMDIR="`pwd`/nim-1.6.0/bin"
+        # Append to PATH
+        echo "$NIMDIR" >> $GITHUB_PATH
+    - name: check nimble is available
+      run: |
+        # check nimble is accessible on path
+        echo "Nimble version:"
+        nimble --version
+    - name: clone catwalk
+      run: |
+        git clone https://github.com/dvolk/catwalk
+    - name: compile catwalk
+      run: |
+        cd catwalk
+        nimble -y build -d:release -d:danger -d:no_serialisation
+        echo CW_BINARY_FILEPATH=\"`pwd`/cw_server\" > .env
+    - name: test catwalk using catwalk client
+      run: |
+        pip3 install requests psutil
+        pipenv run pytest test/test_pycw_client.py
