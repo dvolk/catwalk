@@ -12,8 +12,8 @@
 
 For example by using Python requests:
 
->>> import requests
->>> requests.post("http://localhost:5000/add_samples_from_mfsl", json={"filepath": "your_mfsl_file.fa"})
+    >>> import requests
+    >>> requests.post("http://localhost:5000/add_samples_from_mfsl", json={"filepath": "your_mfsl_file.fa"})
 
 Wait for this to finish
 
