@@ -143,9 +143,9 @@ Add a sample to catwalk
 
 ### /neighbours/<sample_name>/<distance>
 
-Get a array of tuples [(neighbour_name, distance)] of neighbours of sample_name up to the SNP cut-off distance.
+Get a array of tuples [[neighbour_name, distance]] of neighbours of sample_name up to the SNP cut-off distance.
 
-    >>> requests.get("http://localhost:5000/neighbours/sample_name/20")
+    >>> requests.get("http://localhost:5000/neighbours/sample_name/20").json()
 
 ### /add_samples_from_mfsl
 
