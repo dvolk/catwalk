@@ -44,7 +44,23 @@ def go(cog_multifasta_file="", N=100, distances="1,10,100,1000"):
             get_neighbours(random_sample, distance)
         distance_times[distance] = get_neighbours_times()
         clear_neighbours_times()
-    print(json.dumps(distance_times))
+
+    sample_counts = dict()
+    for sample in random_samples:
+        sample_counts[sample] = requests.get(
+            f"http://localhost:5000/sample_counts/{sample}"
+        ).json()
+
+    print(
+        json.dumps(
+            {
+                "number_of_samples": len(all_samples),
+                "distance_times": distance_times,
+                "sample_counts": sample_counts,
+                "sample_names": random_samples,
+            }
+        )
+    )
 
 
 if __name__ == "__main__":

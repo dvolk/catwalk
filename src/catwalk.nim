@@ -42,7 +42,7 @@ type
     active_samples: TableRef[int, Sample]
     all_sample_indexes: TableRef[string, int]
     all_sample_names: TableRef[int, string]
-    neighbours_times: seq[float]
+    neighbours_times: Table[string, float]
 
 
 #
@@ -162,13 +162,31 @@ proc get_neighbours*(c: var CatWalk, sample_name: string, distance: int) : seq[(
     sample = c.active_samples[sample_index]
     neighbours = c.process_neighbours(sample, sample_index, distance)
   let dt = cpuTime() - time1
-  c.neighbours_times.add(dt)
+  c.neighbours_times[sample_name] = dt
   let sam_num = c.active_samples.len
   echo "Performed " & $sam_num & " distance " & $distance & " comparisons on sample \"" & sample_name & "\" in " & $dt & " seconds (~" & $((1.0 / (dt.float32 / sam_num.float32)) / 1000).int & "k per second)"
 
   result = @[]
   for (neighbour_index, distance) in neighbours:
     result.add((c.all_sample_names[neighbour_index], distance))
+
+
+proc get_sample_counts*(c: var CatWalk, sample_name: string): Table[string, int] =
+  let
+    sample_index = c.all_sample_indexes[sample_name]
+    sample = c.active_samples[sample_index]
+  { "N": sample.n_positions.len(),
+    "A": sample.diffsets[0].len(),
+    "C": sample.diffsets[1].len(),
+    "G": sample.diffsets[2].len(),
+    "T": sample.diffsets[3].len() }.toTable()
+
+
+proc dump_sample*(c: var CatWalk, sample_name: string): string =
+  let
+    sample_index = c.all_sample_indexes[sample_name]
+    sample = c.active_samples[sample_index]
+  return $sample
 
 let measure = false
 

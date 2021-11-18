@@ -47,6 +47,8 @@ def go(
         mutate_elems_count_max=3,
         seed=0,
 ):
+    file_prefix = f"syn-{number_of_samples}_{reference_length}_{max_percent_of_ns}_{mutate_elems_count_max}"
+
     logging.info(f"number_of_samples={number_of_samples}, reference_length={reference_length}, max_percent_of_ns={max_percent_of_ns}, mutate_elems_count_max={mutate_elems_count_max}")
     # initialize rng so we always get the same seqs with the same seed
     random.seed(seed)
@@ -56,7 +58,7 @@ def go(
     reference = random.choices(reference_elems, k=reference_length)
 
     # write the reference to ref.fa
-    with open("ref.fa", "w") as f:
+    with open(f"{file_prefix}-ref.fa", "w") as f:
         reference_name = (
             f">synthetic-reference_{reference_length}_{max_percent_of_ns}" + "\n"
         )
@@ -67,11 +69,11 @@ def go(
 
     # create samples and write to mfsl.fa
     # since we're appending, first delete it
-    os.system("rm mfsl.fa")
+    os.system(f"rm {file_prefix}-mfsl.fa")
     sample = None
     samples = [reference]
     for i in range(number_of_samples):
-        with open("mfsl.fa", "a") as f:
+        with open(f"{file_prefix}-mfsl.fa", "a") as f:
             sample_name = f">syn-{i}"
             to_mutate_idx = random.randint(0, len(samples)-1)
             logging.info(f"mutating sample id {to_mutate_idx}")
@@ -90,8 +92,8 @@ def go(
         if i > 0 and i % 1000 == 0:
             logging.warning(f"{i} / {number_of_samples}")
 
-    logging.info("reference saved to ref.fa")
-    logging.info("samples saved to mfsl.fa")
+    logging.info("reference saved to {file_prefix}-ref.fa")
+    logging.info("samples saved to {file_prefix}-mfsl.fa")
 
 
 if __name__ == "__main__":

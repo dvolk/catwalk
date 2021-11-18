@@ -85,8 +85,14 @@ router app:
   get "/neighbours_times":
     resp %*(c.neighbours_times)
 
+  get "/sample_counts/@name":
+    resp %*(c.get_sample_counts(@"name"))
+
+  get "/dump_sample/@name":
+    resp %*(c.dump_sample(@"name"))
+
   post "/clear_neighbours_times":
-    c.neighbours_times = @[]
+    c.neighbours_times = initTable[string, float]()
     resp Http200, "ok"
 
   get "/list_samples":
