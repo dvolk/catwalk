@@ -11,11 +11,6 @@ The memory usage is 160kb per sequence for a pathogen of 4M bases, therefore com
 
 - nim >= 1.4.0
 
-## Unit tests
-# uses a python virtual environment, runs tests through python client
-pipenv install
-./run_tests.sh
-
 ### Installing nim (on Linux)
 
 The following assumes you're putting nim in the home directory, but you can put it anywhere and then edit the paths below
@@ -67,6 +62,13 @@ This creates four binaries: `cw_server`, `cw_client`, `cw_webui`, `refcompress`
                 --mask-filepath=res/masks/TB-exclude-adaptive.txt \
                 --max_distance=20
 
+## Unit tests
+
+Using a python virtual environment, run tests through python client
+
+    pipenv install
+    ./run_tests.sh
+
 ## Batch adding samples
 
 use something like `find`. e.g.:
@@ -114,6 +116,52 @@ sfdp example.dot -Tpng -o example.png
 ```
 
 This creates a cluster graph for SNP distance 12, see [an output example](https://gitea.mmmoxford.uk/dvolk/catwalk/raw/branch/master/doc/cluster-example.png).
+
+## HTTP API
+
+Catwalk provides the following HTTP API endpoints (examples are given with the Python Requests library):
+
+### /info
+
+Returns server information such which reference is used, memory used, version, etc.
+
+    >>> requests.get("http://localhost:5000/info").json()
+
+### /list_samples
+
+Returns a JSON array of sample names loaded into the server.
+
+    >>> requests.get("http://localhost:5000/list_samples").json()
+
+### /add_sample
+
+Add a sample to catwalk
+
+    >>> requests.post("http://localhost:5000/add_sample", json={ "name": sample_name,
+                                                                 "sequence": "ACGTACGT",
+                                                                 "keep": True })
+
+### /neighbours/<sample_name>/<distance>
+
+Get a array of tuples [(neighbour_name, distance)] of neighbours of sample_name up to the SNP cut-off distance.
+
+    >>> requests.get("http://localhost:5000/neighbours/sample_name/20")
+
+### /add_samples_from_mfsl
+
+Add samples to catwalk in the multifasta singleline format.
+
+    >>> requests.post("http://localhost:5000/add_samples_from_mfsl", json={"filepath": "mysamples.fa"})
+
+The filepath must be readable from the catwalk server.
+
+This is faster than sending the sequences over HTTP with /add_sample. For maximum performance, use fast storage such as SSD drives.
+
+### /remove_sample/<sample_name>
+
+Remove a sample from catwalk
+
+    >>> requests.get("http://localhost:5000/remove_sample/sample_name")
 
 ## References
 
