@@ -46,4 +46,5 @@ jobs:
     - name: test catwalk python tests 2
       run: |
         cd catwalk/test
+        pip3 install argh requests
         python3 test.py
