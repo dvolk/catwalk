@@ -41,7 +41,7 @@ jobs:
         CW_BINARY_FILEPATH=`pwd`/cw_server pytest test/test_pycw_client.py
     - name: test catwalk symdiff
       run: |
-        cd catwalk
+        cd catwalk/src
         nim c -r symdiff.nim
     - name: test catwalk python tests 2
       run: |
