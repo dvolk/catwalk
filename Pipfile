@@ -7,6 +7,8 @@ name = "pypi"
 requests = "*"
 pytest = "*"
 psutil = "*"
+bio = "*"
+pandas = "*"
 
 [dev-packages]
 
