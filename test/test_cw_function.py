@@ -8,7 +8,7 @@ This program is free software: you can redistribute it and/or modify
 it under the terms of the MIT License as published
 by the Free Software Foundation.  See <https://opensource.org/licenses/MIT>, and the LICENSE file.
 
- 
+
 
 """
 
@@ -30,7 +30,7 @@ class test_cw(unittest.TestCase):
             reference_name="test",
             reference_filepath="reference/testref.fasta",
             mask_filepath="reference/nil.txt",
-            max_distance=2,
+            max_n_positions=130000,
             bind_host="localhost",
             bind_port=5999,
         )
@@ -115,4 +115,3 @@ class test_cw_3(test_cw):
         self.assertEqual(res, 201)
 
         self.assertEqual(self.cw.neighbours("guid1"), [("guid2", 1)])
-       

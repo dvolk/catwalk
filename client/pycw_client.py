@@ -313,13 +313,17 @@ in either
             )
         return r.status_code
 
-    def neighbours(self, name, distance=0):
+    def neighbours(self, name, distance=None):
         """get neighbours.  neighbours are recomputed on demand.
 
         Parameters:
         name:  the name of the sample to search for
-        distance: the maximum distance reported.  if distance is not supplied, 0 is used.
+        distance: the maximum distance reported.  if distance is not supplied, 99 is used.
         """
+        if not distance:
+            logging.warning("no distance supplied. Using 99")
+            distance = 99
+
         r = requests.get("{0}/neighbours/{1}/{2}".format(self.cw_url, name, distance))
         r.raise_for_status()
         j = r.json()
