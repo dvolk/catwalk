@@ -14,7 +14,7 @@ def start_test_catwalk():
     os.system("echo -n '>test\nACGTACGT' > test.ref")
     os.system("touch test.mask")
     os.system(
-        "../cw_server --instance_name=test --reference_filepath=test.ref --mask-filepath=test.mask --max-distance=50 &"
+        "../cw_server --instance_name=test --reference_filepath=test.ref --mask-filepath=test.mask &"
     )
     time.sleep(1)
 

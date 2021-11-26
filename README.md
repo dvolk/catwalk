@@ -60,7 +60,7 @@ This creates four binaries: `cw_server`, `cw_client`, `cw_webui`, `refcompress`
     ./cw_server --instance-name=test \
                 --reference-filepath=res/references/R00000039.fa \
                 --mask-filepath=res/masks/TB-exclude-adaptive.txt \
-                --max_distance=20
+                --max_n_positions 130000
 
 ## Unit tests
 

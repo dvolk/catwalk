@@ -29,15 +29,11 @@ type
     name: string
     positions: IntSet
 
-  Settings* = tuple
-    max_distance: int
-    max_n_positions: int
-
   CatWalk* = tuple
-    settings: Settings
     name: string
     reference_name: string
     reference_sequence: string
+    max_n_positions: int
     mask: Mask
     active_samples: TableRef[int, Sample]
     all_sample_indexes: TableRef[string, int]
@@ -129,13 +125,12 @@ proc new_Mask*(mask_name: string, mask_str: string): Mask =
 # CatWalk
 #
 
-proc new_CatWalk*(name: string, reference_name: string, reference_sequence: string, mask: Mask) : CatWalk =
+proc new_CatWalk*(name: string, reference_name: string, reference_sequence: string, mask: Mask, max_n_positions: int) : CatWalk =
   result.name = name
   result.reference_name = reference_name
   result.reference_sequence = reference_sequence
   result.mask = mask
-  result.settings.max_distance = 20
-  result.settings.max_n_positions = 130000
+  result.max_n_positions = max_n_positions
   result.active_samples = newTable[int, Sample]()
   result.all_sample_indexes = newTable[string, int]()
   result.all_sample_names = newTable[int, string]()
@@ -193,7 +188,7 @@ let measure = false
 proc add_sample*(c: var CatWalk, name: string, sequence: string, keep: bool) =
   let time1 = cpuTime()
   var
-    sample = reference_compress(sequence, c.reference_sequence, c.mask, c.settings.max_n_positions)
+    sample = reference_compress(sequence, c.reference_sequence, c.mask, c.max_n_positions)
 
   let sample_index = len(c.all_sample_indexes)
   c.all_sample_indexes[name] = sample_index
@@ -253,7 +248,7 @@ when isMainModule:
     mask = new_Mask("test", "0")
     rs = "AAACGT"
   var
-    c = new_CatWalk("testcw", "testref", rs, mask)
+    c = new_CatWalk("testcw", "testref", rs, mask, 130000)
 
   c.add_sample("s0", "AAACGT", true)
   c.add_sample("s1", "AAACGT", true)

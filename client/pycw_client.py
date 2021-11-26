@@ -69,7 +69,7 @@ class CatWalk:
         reference_name,
         reference_filepath,
         mask_filepath,
-        max_distance,
+        max_n_positions,
         bind_host,
         bind_port,
         identity_token=None,
@@ -82,7 +82,7 @@ class CatWalk:
         reference_name
         reference_filepath
         mask_filepath
-        max_distance
+        max_n_positions
         bind_host
         bind_port
 
@@ -126,13 +126,13 @@ in either
         self.cw_binary_filepath = cw_binary_filepath
         self.reference_filepath = reference_filepath
         self.mask_filepath = mask_filepath
-        self.max_distance = max_distance
+        self.max_n_positions = max_n_positions
         self.reference_name = reference_name
         self.instance_stem = "CatWalk-PORT-{0}".format(self.bind_port)
         if identity_token is None:
             identity_token = str(uuid.uuid1())
         self.instance_name = "{0}-SNV-{1}-{2}".format(
-            self.instance_stem, self.max_distance, identity_token
+            self.instance_stem, self.max_n_positions, identity_token
         )
 
         # start up if not running
@@ -163,7 +163,7 @@ in either
         reference_filepath = shlex.quote(self.reference_filepath)
         mask_filepath = shlex.quote(self.mask_filepath)
 
-        cmd = f"nohup {cw_binary_filepath} --instance_name {instance_name}  --bind_host {self.bind_host} --bind_port {self.bind_port} --reference_filepath {reference_filepath}  --mask_filepath {mask_filepath} --max_distance {self.max_distance} > cw_server_nohup.out &"
+        cmd = f"nohup {cw_binary_filepath} --instance_name {instance_name}  --bind_host {self.bind_host} --bind_port {self.bind_port} --reference_filepath {reference_filepath}  --mask_filepath {mask_filepath} --max_n_positions {self.max_n_positions} > cw_server_nohup.out &"
         logging.info("Attempting startup of CatWalk server : {0}".format(cmd))
 
         os.system(cmd)
@@ -246,7 +246,7 @@ in either
         if refcomp is None:
             # issue warning, return
             logging.warning("Asked to reload catwalk with {0} but the refcomp was None".format(name))
-            
+
         refcompressed = self._filter_refcomp(refcomp)
         payload = {"name": name, "refcomp": json.dumps(refcompressed), "keep": True}
 
@@ -313,15 +313,13 @@ in either
             )
         return r.status_code
 
-    def neighbours(self, name, distance=None):
+    def neighbours(self, name, distance=0):
         """get neighbours.  neighbours are recomputed on demand.
 
         Parameters:
         name:  the name of the sample to search for
-        distance: the maximum distance reported.  if distance is not supplied, self.max_distance is used.
+        distance: the maximum distance reported.  if distance is not supplied, 0 is used.
         """
-        if distance is None:
-            distance = self.max_distance
         r = requests.get("{0}/neighbours/{1}/{2}".format(self.cw_url, name, distance))
         r.raise_for_status()
         j = r.json()
@@ -332,4 +330,3 @@ in either
         r = requests.get("{0}/list_samples".format(self.cw_url))
         r.raise_for_status()
         return r.json()
-        

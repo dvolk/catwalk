@@ -66,8 +66,7 @@ proc route_info(): JsonNode =
       "reference_sequence_length": c.reference_sequence.len,
       "mask_name": c.mask.name,
       "mask_positions": c.mask.positions.len,
-      "max_distance": c.settings.max_distance,
-      "max_n_positions": c.settings.max_n_positions,
+      "max_n_positions": c.max_n_positions,
       "total_mem": getTotalMem(),
       "occupied_mem": getOccupiedMem(),
       "n_samples": c.active_samples.len,
@@ -210,7 +209,7 @@ proc main(bind_host: string = "0.0.0.0",
           instance_name: string,
           reference_filepath: string,
           mask_filepath: string,
-          max_distance: int) =
+          max_n_positions: int = 130000) =
   echo "starting cw_server " & compile_version &
     " (build time: " & compile_time & ")"
 
@@ -218,9 +217,9 @@ proc main(bind_host: string = "0.0.0.0",
     (_, refseq) = parse_fasta_file(reference_filepath)
     mask = new_Mask(mask_filepath, readFile(mask_filepath))
 
-  echo mask.positions.len
-  c = new_CatWalk(instance_name, reference_filepath, refseq, mask)
-  c.settings.max_distance = max_distance
+  c = new_CatWalk(instance_name, reference_filepath, refseq, mask, max_n_positions)
+  echo fmt"mask positions: {mask.positions.len}"
+  echo fmt"max unknown non-masked positions: {max_n_positions}"
 
   when defined(no_serialisation):
     echo "skipping loading instance files because this catwalk was built with -d:no_serialisation"
