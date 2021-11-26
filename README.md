@@ -1,5 +1,7 @@
 # CatWalk
 
+![example workflow](https://github.com/dvolk/catwalk/actions/workflows/test_cw.yml/badge.svg)
+
 ## Description
 
 CatWalk is a memory-efficient and ultra-fast web server to compute pairwise single nucleotide polymorphism (SNP) distance matrix written in Nim language.
