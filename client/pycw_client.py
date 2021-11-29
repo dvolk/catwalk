@@ -126,12 +126,12 @@ in either
         self.cw_binary_filepath = cw_binary_filepath
         self.reference_filepath = reference_filepath
         self.mask_filepath = mask_filepath
-        self.max_n_positions = max_n_positions
+        self.max_n_positions = int(max_n_positions)
         self.reference_name = reference_name
         self.instance_stem = "CatWalk-PORT-{0}".format(self.bind_port)
         if identity_token is None:
             identity_token = str(uuid.uuid1())
-        self.instance_name = "{0}-SNV-{1}-{2}".format(
+        self.instance_name = "{0}-MAXN-{1}-{2}".format(
             self.instance_stem, self.max_n_positions, identity_token
         )
 
@@ -257,48 +257,6 @@ in either
         if r.status_code not in [200, 201]:
             raise CatWalkServerInsertError(
                 message="Failed to insert {0}; return code was {1}".format(name, r.text)
-            )
-        return r.status_code
-
-    def add_sample_from_refcomps(self, refcomps):
-        """
-        Add reference compressed sequences to the catwalk.
-
-        refcomps is a dictionary of dictionaries.
-        The outer keys are sample names, and the values are dictionaries containing reference compressed sequences
-         (dict with ACGTN keys and list of positions as values)
-
-        Returns:
-        status code
-        201 = added successfully
-        200 = was already present
-        """
-
-        # not currently implemented
-        raise NotImplementedError(
-            "add_sample_to_refcomps endpoint is not currently implemented by the python client"
-        )
-
-        ## needs review when catwalk expected data structure is confirmed
-        if not isinstance(refcomps, dict):
-            raise TypeError("refcomps must be dict not {0}".format(type(refcomps)))
-
-        dicts_to_submit = []
-        names_to_submit = []
-        for sequence_name in refcomps.keys():
-            names_to_submit.append(sequence_name)
-            dicts_to_submit.append(self._filter_refcomp(refcomps[sequence_name]))
-
-        payload = json.dumps(dict(names=names_to_submit, refcomps=dicts_to_submit))
-        print(payload)
-
-        r = requests.post(
-            "{0}/add_sample_from_refcomp_array".format(self.cw_url), json=payload
-        )
-        r.raise_for_status()
-        if r.status_code not in [201]:
-            raise CatWalkServerInsertError(
-                message="Failed to insert {0}; return code was {1}".format(sequence_name, r.text)
             )
         return r.status_code
 

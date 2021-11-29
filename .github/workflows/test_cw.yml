@@ -38,7 +38,9 @@ jobs:
       run: |
         cd catwalk
         pip3 install requests psutil pytest
-        CW_BINARY_FILEPATH=`pwd`/cw_server pytest test/test_pycw_client.py
+        CW_BINARY_FILEPATH=`pwd`/cw_server 
+        pytest test/test_pycw_client.py
+        pytest test/test_cw_function.py
     - name: test catwalk symdiff
       run: |
         cd catwalk/src
