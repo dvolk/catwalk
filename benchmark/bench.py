@@ -1,8 +1,11 @@
+"""Run catwalk benchmark and output json results."""
+
 import json
 import random
+import platform
 
-import requests
 import argh
+import requests
 
 
 def get_neighbours(sample_name, snp_distance):
@@ -58,7 +61,8 @@ def go(cog_multifasta_file="", N=100, distances="1,10,100,1000"):
                 "distance_times": distance_times,
                 "sample_counts": sample_counts,
                 "sample_names": random_samples,
-            }
+            },
+            indent=4
         )
     )
 

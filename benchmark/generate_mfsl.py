@@ -1,23 +1,16 @@
-import random
-import os
+"""Generate random sequences for benchmarking."""
+
 import logging
+import os
+import random
 
 import argh
-
 
 logging.basicConfig(level=logging.WARNING)
 
 
-def mutate_v1(seq, max_percent_of_ns, percent_mutation, seed):
-    for i, _ in enumerate(seq):
-        if random.uniform(0, 101) < percent_mutation:
-            seq[i] = random.choice("ACGT")
-        if random.uniform(0, 101) < random.uniform(0, max_percent_of_ns):
-            seq[i] = "N"
-    return seq
-
-
 def mask(seq, max_percent_of_ns):
+    """Mask up to max_percent_of_ns of the sequence."""
     seqlen = len(seq)
     seq = seq[:]
     if max_percent_of_ns > 0:
@@ -31,6 +24,7 @@ def mask(seq, max_percent_of_ns):
 
 
 def mutate_v2(seq, mutate_elems_count_max):
+    """Mutate up to mutate_elems_count_max bases in the sequence."""
     seqlen = len(seq)
     seq = seq[:]
     mutate_elems_count = random.randint(0, mutate_elems_count_max)
@@ -47,6 +41,8 @@ def go(
         mutate_elems_count_max=3,
         seed=0,
 ):
+    """Main function."""
+
     file_prefix = f"syn-{number_of_samples}_{reference_length}_{max_percent_of_ns}_{mutate_elems_count_max}"
 
     logging.info(f"number_of_samples={number_of_samples}, reference_length={reference_length}, max_percent_of_ns={max_percent_of_ns}, mutate_elems_count_max={mutate_elems_count_max}")
@@ -82,6 +78,7 @@ def go(
                 samples[to_mutate_idx],
                 mutate_elems_count_max
             )
+            # save 10% of samples for later mutation
             if random.random() > 0.9:
                 logging.info(f"saving sample {i}")
                 samples.append(sample)
