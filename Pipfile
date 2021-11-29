@@ -9,6 +9,7 @@ pytest = "*"
 psutil = "*"
 bio = "*"
 pandas = "*"
+argh = "*"
 
 [dev-packages]
 

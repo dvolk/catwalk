@@ -13,7 +13,6 @@ by the Free Software Foundation.  See <https://opensource.org/licenses/MIT>, and
 """
 
 import unittest
-import requests
 from client.pycw_client import CatWalk
 
 # unit tests
@@ -24,13 +23,14 @@ class test_cw(unittest.TestCase):
         """cw_binary_filepath must point to the catwalk server and mask & reference files to the relevant data files.
         Shuts down **any catwalk server** running initially.
 
-        Note: requires CW_BINARY_FILEPATH environment variable to point to the catwalk binary."""
+        Note: requires CW_BINARY_FILEPATH environment variable to point to the catwalk binary.
+        """
         self.cw = CatWalk(
             cw_binary_filepath=None,
             reference_name="test",
-            reference_filepath="reference/testref.fasta",
+            reference_filepath="reference/TB-ref.fasta",
             mask_filepath="reference/nil.txt",
-            max_n_positions=130000,
+            max_n_positions=1e5,
             bind_host="localhost",
             bind_port=5999,
         )
@@ -115,3 +115,74 @@ class test_cw_3(test_cw):
         self.assertEqual(res, 201)
 
         self.assertEqual(self.cw.neighbours("guid1"), [("guid2", 1)])
+
+
+class test_cw_4(test_cw):
+    """tests insert"""
+
+    def runTest(self):
+        # two sequences are similar to each other
+        payload1 = {
+            "A": [],
+            "G": [],
+            "T": [],
+            "C": [],
+            "N": list(range(1000)),
+        }
+      
+        res = self.cw.add_sample_from_refcomp("guid1", payload1)
+        self.assertEqual(res, 201)
+
+        res = self.cw.neighbours('guid1',20)
+        self.assertEqual(res, [])
+
+
+class test_cw_4(test_cw):
+    """tests insert and comparison with high Ns"""
+
+    def runTest(self):
+        # three sequences are similar to each other
+        # one has 110,000 Ns, which is more than max_n_storage
+        # one has 90,000 Ns
+        # one has no Ns
+        # all are 0 snp from each other
+        payload1 = {
+            "A": [],
+            "G": [],
+            "T": [],
+            "C": [],
+            "N": list(range(110000))
+        }       # we expect this not to be analysed
+      
+        res = self.cw.add_sample_from_refcomp("guid1", payload1)
+        self.assertEqual(res, 201)
+
+        payload2 = {
+            "A": [],
+            "G": [],
+            "T": [],
+            "C": [],
+            "N": list(range(90000))
+        }
+      
+        res = self.cw.add_sample_from_refcomp("guid2", payload2)
+        self.assertEqual(res, 201)
+
+        payload3 = {
+            "A": [],
+            "G": [],
+            "T": [],
+            "C": [],
+            "N": list(range(0))
+        }
+      
+        res = self.cw.add_sample_from_refcomp("guid3", payload2)
+        self.assertEqual(res, 201)
+
+        res = self.cw.sample_names()
+        self.assertEqual(set(res), set(['guid1','guid2','guid3']))      
+
+        res = self.cw.neighbours('guid1', 20)
+        self.assertEqual(res, [])
+        res = self.cw.neighbours('guid2', 20)
+        self.assertEqual(res, [('guid3',0)])
