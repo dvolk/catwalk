@@ -3,11 +3,9 @@ import jsony
 import tables
 import intsets
 import strutils
-import marshal
 import system
 import os
 import times
-import sequtils
 import strformat
 
 import catwalk
