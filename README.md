@@ -57,39 +57,51 @@ in the catwalk directory, run:
 
 This creates four binaries: `cw_server`, `cw_client`, `cw_webui`, `refcompress`
 
-## Starting cw_server (example)
+## Using Catwalk
+
+### Starting cw_server (example)
 
     ./cw_server --instance-name=test \
-                --reference-filepath=res/references/R00000039.fa \
-                --mask-filepath=res/masks/TB-exclude-adaptive.txt \
-                --max_n_positions 130000
+                --reference-filepath=reference/nc_045512.fasta \
+                --mask-filepath=reference/covid-exclude.txt \
 
-## Unit tests
+
+### Unit tests
 
 Using a python virtual environment, run tests through python client
 
     pipenv install
     ./run_tests.sh
 
-## Batch adding samples
+### Batch adding from multifasta file (recommended)
+
+If you have a multifasta file (where sequences don't contain newlines), you can add the samples with the client:
+
+    ./cw_client add_samples_from_mfsl -f /home/dv/cog_all.fasta
+
+### Batch adding individual samples
 
 use something like `find`. e.g.:
 
     find path/to/your/fasta/files -type f -exec ./cw_client add_sample -f {} \;
 
-## Starting the web UI
+### Starting the web UI
 
     ./cw_webui
 
 Open browser at `http://localhost:5001`
 
-## Cache
+### Cache
 
 When you add samples to catwalk, a JSON string of the reference compressed sequence is saved to the `instance-name` directory. When you restart catwalk with that instance name, it will load these sequences automatically. This is much faster than re-adding them every time, and the files are smaller than the original fasta files.
 
 We also provide the `refcompress` binary, which is a program to produce these reference compressed sequences. This enables the reference compression to be done in parallel (e.g. with GNU parallel) or integrated into pipelines.
 
 ## Utils
+
+### utils/make_mfsl.py
+
+Convert a directory of fasta files into the multifasta singleline format.
 
 ### utils/verify.py
 
@@ -164,6 +176,10 @@ This is faster than sending the sequences over HTTP with /add_sample. For maximu
 Remove a sample from catwalk
 
     >>> requests.get("http://localhost:5000/remove_sample/sample_name")
+
+## Benchmarks
+
+Please see `benchmark` directory readme.
 
 ## References
 
