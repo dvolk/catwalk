@@ -217,12 +217,14 @@ proc remove_sample*(c: var CatWalk, name: string) =
 
 
 proc add_sample_from_refcomp*(c: var CatWalk, name: string, refcomp_json: string, keep: bool) =
-  let
-    tbl = refcomp_json.fromJson(Table[string, seq[int]])
-  var
-    sample = new_Sample()
+  let tbl = refcomp_json.fromJson(Table[string, seq[int]])
+  if tbl["N"].len > c.max_n_positions:
+    return
+
+  var sample = new_Sample()
   sample.status = Ok
   sample.n_positions = toIntSet(tbl["N"])
+
   sample.diffsets[0] = tbl["A"]
   sample.diffsets[1] = tbl["C"]
   sample.diffsets[2] = tbl["G"]
