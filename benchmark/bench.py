@@ -23,7 +23,7 @@ def clear_neighbours_times():
 
 
 def get_sample_list():
-    return requests.get("http://localhost:5000/list_samples").json()
+    return requests.get("http://localhost:5000/list_ok_samples").json()
 
 
 def load_cog_samples(cog_multifasta_file):
