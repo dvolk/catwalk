@@ -11,7 +11,7 @@ def go(fasta_dir):
 
     for i, f in enumerate(fs):
         o = open(f).readlines()
-        header = f.name
+        header = ">" + f.name
         seq = "".join(x.strip() for x in o[1:])
         if i > 0 and i % 1000 == 0:
             print(f"{i} samples processed")
