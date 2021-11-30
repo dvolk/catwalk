@@ -185,17 +185,19 @@ proc dump_sample*(c: var CatWalk, sample_name: string): string =
 
 let measure = false
 
+proc register_sample(c: var CatWalk, sample: Sample, name: string) =
+  let sample_index = len(c.all_sample_indexes)
+  c.all_sample_indexes[name] = sample_index
+  c.all_sample_names[sample_index] = name
+  c.active_samples[sample_index] = sample
+
+
 proc add_sample*(c: var CatWalk, name: string, sequence: string, keep: bool) =
   let time1 = cpuTime()
   var
     sample = reference_compress(sequence, c.reference_sequence, c.mask, c.max_n_positions)
 
-  let sample_index = len(c.all_sample_indexes)
-  c.all_sample_indexes[name] = sample_index
-  c.all_sample_names[sample_index] = name
-
-  if keep:
-    c.active_samples[sample_index] = sample
+  c.register_sample(sample, name)
 
   if measure:
     let l = len(c.all_sample_indexes)
@@ -218,7 +220,11 @@ proc remove_sample*(c: var CatWalk, name: string) =
 
 proc add_sample_from_refcomp*(c: var CatWalk, name: string, refcomp_json: string, keep: bool) =
   let tbl = refcomp_json.fromJson(Table[string, seq[int]])
+
   if tbl["N"].len > c.max_n_positions:
+    var sample = new_Sample()
+    sample.status = TooManyNs
+    c.register_sample(sample, name)
     return
 
   var sample = new_Sample()
@@ -234,13 +240,7 @@ proc add_sample_from_refcomp*(c: var CatWalk, name: string, refcomp_json: string
   sample.diffsets[2].sort()
   sample.diffsets[3].sort()
 
-  let sample_index = len(c.all_sample_indexes)
-  c.all_sample_indexes[name] = sample_index
-  c.all_sample_names[sample_index] = name
-
-  if keep:
-    c.active_samples[sample_index] = sample
-
+  c.register_sample(sample, name)
 
 #
 # test
