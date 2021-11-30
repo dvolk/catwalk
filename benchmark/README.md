@@ -1,6 +1,10 @@
 # How to benchmark catwalk
 
-## Find some fasta files and the corresponding gnome reference fasta file
+These scripts were used for benchmarking catwalk for the paper.
+
+## Obtain test dataset
+
+Benchmarking requires a multifasta file containing genomes, and a fasta file containing the reference genome against which mapping occurred.  For details of test sets used, see [paper- To add]
 
 for example:
 

@@ -20,57 +20,15 @@ def go(filename):
     distances = distance_times.keys()
     averages = [statistics.mean(row.values()) for row in distance_times.values()]
 
-    # plot 1
-
     fig = plt.gcf()
     ax1 = fig.add_subplot(111)
-
-    errors = [scipy.stats.sem(list(row.values())) for row in distance_times.values()]
-    plt.xlabel("SNP Distance")
-    plt.ylabel("Seconds")
-
-    plt.errorbar(
-        distances,
-        averages,
-        errors,
-        elinewidth=1,
-        capsize=0,
-        color="r",
-        label="Average time taken for comparison",
-    )
-    fig = plt.gcf()
-    fig.set_size_inches(18.5, 10.5)
-
-    # plot 2
-
-    n_counts = dict()
-    for sample_name in sample_names:
-        n_counts[sample_name] = sample_counts[sample_name]["N"]
-
     ax2 = ax1.twinx()
     ax2.set_ylim(-1, 1)
 
-    npos_corrs = dict()
-    for distance in distances:
-        xs = list()
-        ys = list()
-        for sample_name in sample_names:
-            xs.append(n_counts[sample_name])
-            ys.append(distance_times[distance][sample_name])
-        npos_corrs[distance] = scipy.stats.pearsonr(xs, ys)[0]
-
-    ax2.plot(
-        distances,
-        npos_corrs.values(),
-        color="g",
-        label="Correlation between number of unknown positions and comparison time",
-    )
-
-    fig.set_size_inches(18.5, 10.5)
-    plt.xlabel("Comparison distance")
-    plt.ylabel("Correlation")
-
-    # plot 3
+    # plot 1
+    # show the average comparison time for a sample against all samples for given
+    # distances and show correlation between comparison time and distance to reference
+    # and comparison time to number of unknown positions
 
     diff_count = dict()
     for sample_name in sample_names:
@@ -110,7 +68,10 @@ def go(filename):
     plt.savefig(f"{filename}-acgt_corr.png")
     plt.close()
 
-    # plot 4
+    # plot 2
+    # take the N samples above, sort by number of unknown positions, divide sorted
+    # list into quarters and plot average comparison time against distance format
+    # the four sets of samples
 
     sorted_by_unknown_positions = sorted(
         [
@@ -158,7 +119,10 @@ def go(filename):
     plt.savefig(f"{filename}-unknownpos2525.png")
     plt.close()
 
-    # plot 5
+    # plot 3
+    # take the N samples above, sort by distance from reference, divide sorted
+    # list into quarters and plot average comparison time against distance format
+    # the four sets of samples
 
     sorted_by_unknown_positions = sorted(
         [

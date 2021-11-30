@@ -1,4 +1,31 @@
-"""Generate random sequences for benchmarking."""
+"""Generate random sequences for benchmarking.
+
+This script generates a multifasta file potentially useful for benchmarking catwalk. It
+generates a reference genome and mutates the reference and future samples to generate
+more samples. 10% of samples are saved for future mutation.
+
+Parameters (and defaults):
+
+- number_of_samples=10
+
+How many samples to create
+
+- reference_length=10
+
+How many bases the reference (and samples) should have.
+
+- max_percent_of_ns=0.0
+
+How many Ns the samples should have. This will be [0, max_percent_of_ns] percent
+
+- mutate_elems_count_max=3
+
+How many bases to change for every new sample. This will be [0, mutate_elems_count_max]
+
+- seed=0
+
+Random seed to use. For repeatable sample generation.
+"""
 
 import logging
 import os
