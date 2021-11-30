@@ -100,6 +100,14 @@ router app:
         ret.add(%*c.all_sample_names[k])
     resp ret
 
+  get "/list_ok_samples":
+    var
+      ret = newJArray()
+    for k in c.active_samples.keys:
+      if c.active_samples[k].status == Ok:
+        ret.add(%*c.all_sample_names[k])
+    resp ret
+
   get "/get_sample/@name":
     resp %*({ "name": @"name" })
 
