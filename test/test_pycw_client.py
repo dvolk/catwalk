@@ -14,7 +14,7 @@ by the Free Software Foundation.  See <https://opensource.org/licenses/MIT>, and
 
 import unittest
 import requests
-from client.pycw_client import CatWalk
+from pyclient.pycw_client import CatWalk
 
 # unit tests
 class test_cw(unittest.TestCase):

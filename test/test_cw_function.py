@@ -13,7 +13,7 @@ by the Free Software Foundation.  See <https://opensource.org/licenses/MIT>, and
 """
 
 import unittest
-from client.pycw_client import CatWalk
+from pyclient.pycw_client import CatWalk
 
 # unit tests
 class test_cw(unittest.TestCase):
@@ -129,7 +129,7 @@ class test_cw_4(test_cw):
             "C": [],
             "N": list(range(1000)),
         }
-      
+
         res = self.cw.add_sample_from_refcomp("guid1", payload1)
         self.assertEqual(res, 201)
 
@@ -153,7 +153,7 @@ class test_cw_4(test_cw):
             "C": [],
             "N": list(range(110000))
         }       # we expect this not to be analysed
-      
+
         res = self.cw.add_sample_from_refcomp("guid1", payload1)
         self.assertEqual(res, 201)
 
@@ -164,7 +164,7 @@ class test_cw_4(test_cw):
             "C": [],
             "N": list(range(90000))
         }
-      
+
         res = self.cw.add_sample_from_refcomp("guid2", payload2)
         self.assertEqual(res, 201)
 
@@ -175,12 +175,12 @@ class test_cw_4(test_cw):
             "C": [],
             "N": list(range(0))
         }
-      
+
         res = self.cw.add_sample_from_refcomp("guid3", payload2)
         self.assertEqual(res, 201)
 
         res = self.cw.sample_names()
-        self.assertEqual(set(res), set(['guid1','guid2','guid3']))      
+        self.assertEqual(set(res), set(['guid1','guid2','guid3']))
 
         res = self.cw.neighbours('guid1', 20)
         self.assertEqual(res, [])
