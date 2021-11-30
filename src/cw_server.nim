@@ -96,7 +96,7 @@ router app:
     var
       ret = newJArray()
     for k in c.active_samples.keys:
-      if c.active_samples[k].status == Ok:
+      if c.active_samples[k].status != Removed:
         ret.add(%*c.all_sample_names[k])
     resp ret
 
