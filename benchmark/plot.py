@@ -22,49 +22,28 @@ def go(filename):
 
     fig = plt.gcf()
     ax1 = fig.add_subplot(111)
-    ax2 = ax1.twinx()
-    ax2.set_ylim(-1, 1)
 
     # plot 1
     # show the average comparison time for a sample against all samples for given
-    # distances and show correlation between comparison time and distance to reference
-    # and comparison time to number of unknown positions
+    # distances
 
-    diff_count = dict()
-    for sample_name in sample_names:
-        c = (
-            sample_counts[sample_name]["A"]
-            + sample_counts[sample_name]["C"]
-            + sample_counts[sample_name]["G"]
-            + sample_counts[sample_name]["T"]
-        )
-        diff_count[sample_name] = c
+    errors = [scipy.stats.sem(list(row.values())) for row in distance_times.values()]
+    plt.xlabel("SNP Distance")
+    plt.ylabel("Seconds")
 
-    npos_corrs = dict()
-    for distance in distances:
-        xs = list()
-        ys = list()
-        for sample_name in sample_names:
-            xs.append(diff_count[sample_name])
-            ys.append(distance_times[distance][sample_name])
-        npos_corrs[distance] = scipy.stats.pearsonr(xs, ys)[0]
-
-    ax2.plot(
+    ax1.errorbar(
         distances,
-        npos_corrs.values(),
-        color="b",
-        label="Correlation between distance from reference and comparison time",
+        averages,
+        errors,
+        elinewidth=1,
+        capsize=0,
+        color="r",
+        label="Average time taken for comparison",
     )
 
-    lines, labels = ax1.get_legend_handles_labels()
-    lines2, labels2 = ax2.get_legend_handles_labels()
-    ax2.legend(lines + lines2, labels + labels2, loc=4)
-
     fig.set_size_inches(13, 9)
-    plt.xlabel("Comparison distance")
-    plt.ylabel("Correlation")
     plt.title(f"Performance for dataset {sys.argv[1]}")
-    plt.tight_layout()
+    ax1.set_xticks(ax1.get_xticks()[::5])
     plt.savefig(f"{filename}-acgt_corr.png")
     plt.close()
 
@@ -113,9 +92,9 @@ def go(filename):
     fig.set_size_inches(6, 6)
     plt.xlabel("Comparison distance")
     plt.ylabel("Time [s]")
-    ax1.set_xticks(ax1.get_xticks()[::5])
     ax1.legend()
     plt.title(f"Comparison time for # of unknown positions\n(dataset {sys.argv[1]})")
+    ax1.set_xticks(ax1.get_xticks()[::5])
     plt.savefig(f"{filename}-unknownpos2525.png")
     plt.close()
 
@@ -161,9 +140,9 @@ def go(filename):
     fig.set_size_inches(5, 5)
     plt.xlabel("Comparison distance")
     plt.ylabel("Time [s]")
-    ax1.set_xticks(ax1.get_xticks()[::5])
     ax1.legend()
     plt.title(f"Comparison time by distance from reference\n(dataset {sys.argv[1]})")
+    ax1.set_xticks(ax1.get_xticks()[::5])
     plt.savefig(f"{filename}-refdist2525.png")
     plt.close()
 
