@@ -13,6 +13,8 @@ by the Free Software Foundation.  See <https://opensource.org/licenses/MIT>, and
 """
 
 import unittest
+import glob
+import json
 from pyclient.pycw_client import CatWalk
 
 # unit tests
@@ -37,13 +39,17 @@ class test_cw(unittest.TestCase):
 
         # stop the server if it is running
         self.cw.stop()
+        self.assertEqual(len(self.cw._running_servers()), 0)
+        
         self.assertFalse(self.cw.server_is_running())
 
         self.cw.start()
+        self.assertEqual(len(self.cw._running_servers()), 1)
         self.assertTrue(self.cw.server_is_running())
 
     def teardown(self):
         self.cw.stop()
+        self.assertEqual(len(self.cw._running_servers()), 0)
         pass
 
 
@@ -54,6 +60,7 @@ class test_cw_1(test_cw):
     def runTest(self):
 
         self.cw.start()
+               
         self.assertTrue(self.cw.server_is_running())
 
         self.assertIsInstance(self.cw.info(), dict)
@@ -87,7 +94,7 @@ class test_cw_2(test_cw):
         res = self.cw.add_sample_from_refcomp("guid2", payload2)
         self.assertEqual(res, 201)
 
-        self.assertEqual(self.cw.neighbours("guid1"), [("guid2", 0)])
+        self.assertEqual(self.cw.neighbours("guid1",20), [("guid2", 0)])
 
 class test_cw_3(test_cw):
     """tests insert"""
@@ -117,7 +124,7 @@ class test_cw_3(test_cw):
         self.assertEqual(self.cw.neighbours("guid1"), [("guid2", 1)])
 
 
-class test_cw_4(test_cw):
+class test_cw_5(test_cw):
     """tests insert"""
 
     def runTest(self):
@@ -129,7 +136,7 @@ class test_cw_4(test_cw):
             "C": [],
             "N": list(range(1000)),
         }
-
+      
         res = self.cw.add_sample_from_refcomp("guid1", payload1)
         self.assertEqual(res, 201)
 
@@ -137,7 +144,7 @@ class test_cw_4(test_cw):
         self.assertEqual(res, [])
 
 
-class test_cw_4(test_cw):
+class test_cw_6(test_cw):
     """tests insert and comparison with high Ns"""
 
     def runTest(self):
@@ -153,7 +160,7 @@ class test_cw_4(test_cw):
             "C": [],
             "N": list(range(110000))
         }       # we expect this not to be analysed
-
+      
         res = self.cw.add_sample_from_refcomp("guid1", payload1)
         self.assertEqual(res, 201)
 
@@ -164,7 +171,7 @@ class test_cw_4(test_cw):
             "C": [],
             "N": list(range(90000))
         }
-
+      
         res = self.cw.add_sample_from_refcomp("guid2", payload2)
         self.assertEqual(res, 201)
 
@@ -175,12 +182,12 @@ class test_cw_4(test_cw):
             "C": [],
             "N": list(range(0))
         }
-
-        res = self.cw.add_sample_from_refcomp("guid3", payload2)
+      
+        res = self.cw.add_sample_from_refcomp("guid3", payload3)
         self.assertEqual(res, 201)
 
         res = self.cw.sample_names()
-        self.assertEqual(set(res), set(['guid1','guid2','guid3']))
+        self.assertEqual(set(res), set(['guid1','guid2','guid3']))      
 
         res = self.cw.neighbours('guid1', 20)
         self.assertEqual(res, [])

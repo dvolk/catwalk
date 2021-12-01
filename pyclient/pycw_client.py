@@ -59,6 +59,11 @@ class CatWalkBinaryNotAvailableError(Exception):
         self.expression = expression
         self.message = message
 
+class CatWalkMultipleServersRunningError(Exception):
+    """multiple catwalk servers with identical specification are running"""
+
+    def __init__(self, message):
+        self.message = message
 
 class CatWalk:
     """start, stop, and communicate with a CatWalk server"""
@@ -145,17 +150,36 @@ in either
         if not self.server_is_running():  # startup failed
             raise CatWalkServerDidNotStartError()
 
+    def _running_servers(self):
+        """ returns details of running servers matching the details of this server
+        
+        There should be either 0 or 1 of these only """
+
+        servers = []
+        for proc in psutil.process_iter():
+            if "cw_server" in proc.name():
+                cmdline_parts = proc.cmdline()
+                for i, cmdline_part in enumerate(proc.cmdline()):
+                    if cmdline_part == "--instance_name":
+                        if cmdline_parts[i + 1].startswith(self.instance_stem):
+                            servers.append(cmdline_parts)
+        return servers
+
     def server_is_running(self):
-        """returns true if  response is received by the server, otherwise returns False"""
+        """returns true if the relevant process is running, otherwise false.
+        
+        The alternative strategy, returning true if a response is received by the server,
+        can result in reporting false if the server is busy """
 
-        try:
-            self.info()
-            return True
-        except requests.exceptions.ConnectionError:
+
+        servers = self._running_servers()
+        if len(servers) == 0:
             return False
-        except Exception as e:
-            raise e  # something else when wrong
-
+        elif len(servers) == 1:
+            return True
+        else:
+            raise CatWalkMultipleServersRunningError(message = "{0} servers with specification {1} detected".format(len(servers), self.instance_stem))      # there cannot be multiple servers running
+            
     def start(self):
         """starts a catwalk process in the background"""
         cw_binary_filepath = shlex.quote(self.cw_binary_filepath)
@@ -163,12 +187,13 @@ in either
         reference_filepath = shlex.quote(self.reference_filepath)
         mask_filepath = shlex.quote(self.mask_filepath)
 
-        cmd = f"nohup {cw_binary_filepath} --instance_name {instance_name}  --bind_host {self.bind_host} --bind_port {self.bind_port} --reference_filepath {reference_filepath}  --mask_filepath {mask_filepath} --max_n_positions {self.max_n_positions} > cw_server_nohup.out &"
-        logging.info("Attempting startup of CatWalk server : {0}".format(cmd))
+        if not self.server_is_running():
+            cmd = f"nohup {cw_binary_filepath} --instance_name {instance_name}  --bind_host {self.bind_host} --bind_port {self.bind_port} --reference_filepath {reference_filepath}  --mask_filepath {mask_filepath} --max_n_positions {self.max_n_positions} > cw_server_nohup.out &"
+            logging.info("Attempting startup of CatWalk server : {0}".format(cmd))
 
-        os.system(cmd)
+            os.system(cmd)      # synchronous: will return when it has started
 
-        time.sleep(1)
+            time.sleep(1)       # short break to ensure it has started
         info = self.info()
         if info is None:
             raise CatWalkServerDidNotStartError()
@@ -210,8 +235,10 @@ in either
         Get status information from catwalk
         """
         target_url = "{0}/info".format(self.cw_url)
+
         r = requests.get(target_url)
-        r.raise_for_status()
+        r.raise_for_status()        # report errors
+
         return r.json()
 
     def _filter_refcomp(self, refcomp):
@@ -281,6 +308,8 @@ in either
         if not distance:
             logging.warning("no distance supplied. Using 99")
             distance = 99
+        
+        distance = int(distance)        # if a float, url contstruction may fail
 
         r = requests.get("{0}/neighbours/{1}/{2}".format(self.cw_url, name, distance))
         r.raise_for_status()
