@@ -8,7 +8,6 @@ import argh
 import matplotlib.pyplot as plt
 import numpy as np
 import scipy.stats
-import plotille
 
 
 def go(filename):
@@ -43,7 +42,9 @@ def go(filename):
     fig.set_size_inches(13, 9)
     plt.title(f"Performance for dataset {sys.argv[1]}")
     ax1.set_xticks(ax1.get_xticks()[::5])
-    plt.savefig(f"{filename}-times.png")
+    save_file = f"{filename}-times.svg"
+    print(f"saving to {save_file}")
+    plt.savefig(save_file)
     plt.close()
 
     # plot 2
@@ -62,7 +63,6 @@ def go(filename):
     dataS = np.array_split(sorted_by_unknown_positions, 4)
     linestyles = ["solid", "dotted", "dashed", "dashdot"]
     colors = ["blue", "red", "black", "cyan"]
-    print(dataS)
 
     ax1 = plt.gca()
     fig = plt.gcf()
@@ -79,7 +79,6 @@ def go(filename):
                 vs.append(distance_time)
             ys.append(statistics.mean(vs))
             errs.append(scipy.stats.sem(vs))
-        print(ys)
         ax1.plot(
             xs,
             ys,
@@ -94,7 +93,9 @@ def go(filename):
     ax1.legend()
     plt.title(f"Comparison time for # of unknown positions\n(dataset {sys.argv[1]})")
     ax1.set_xticks(ax1.get_xticks()[::5])
-    plt.savefig(f"{filename}-unknownpos.png")
+    save_file = f"{filename}-unknownpos.svg"
+    print(f"saving to {save_file}")
+    plt.savefig(save_file)
     plt.close()
 
     # plot 3
@@ -127,7 +128,6 @@ def go(filename):
                 vs.append(distance_time)
             ys.append(statistics.mean(vs))
             errs.append(scipy.stats.sem(vs))
-        print(ys)
         ax1.plot(
             xs,
             ys,
@@ -142,7 +142,9 @@ def go(filename):
     ax1.legend()
     plt.title(f"Comparison time by distance from reference\n(dataset {sys.argv[1]})")
     ax1.set_xticks(ax1.get_xticks()[::5])
-    plt.savefig(f"{filename}-refdist.png")
+    save_file = f"{filename}-refdist.svg"
+    print(f"saving to {save_file}")
+    plt.savefig(save_file)
     plt.close()
 
 
