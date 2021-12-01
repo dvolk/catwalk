@@ -16,7 +16,6 @@ def go(filename):
     data = json.loads(open(filename).read())
     distance_times = data["distance_times"]
     sample_counts = data["sample_counts"]
-    sample_names = data["sample_names"]
     distances = distance_times.keys()
     averages = [statistics.mean(row.values()) for row in distance_times.values()]
 
@@ -44,7 +43,7 @@ def go(filename):
     fig.set_size_inches(13, 9)
     plt.title(f"Performance for dataset {sys.argv[1]}")
     ax1.set_xticks(ax1.get_xticks()[::5])
-    plt.savefig(f"{filename}-acgt_corr.png")
+    plt.savefig(f"{filename}-times.png")
     plt.close()
 
     # plot 2
@@ -89,13 +88,13 @@ def go(filename):
             label=f"{i*25}%-{(i+1)*25}%",
         )
 
-    fig.set_size_inches(6, 6)
+    fig.set_size_inches(13, 9)
     plt.xlabel("Comparison distance")
     plt.ylabel("Time [s]")
     ax1.legend()
     plt.title(f"Comparison time for # of unknown positions\n(dataset {sys.argv[1]})")
     ax1.set_xticks(ax1.get_xticks()[::5])
-    plt.savefig(f"{filename}-unknownpos2525.png")
+    plt.savefig(f"{filename}-unknownpos.png")
     plt.close()
 
     # plot 3
@@ -137,13 +136,13 @@ def go(filename):
             label=f"{i*25}%-{(i+1)*25}%",
         )
 
-    fig.set_size_inches(5, 5)
+    fig.set_size_inches(13, 9)
     plt.xlabel("Comparison distance")
     plt.ylabel("Time [s]")
     ax1.legend()
     plt.title(f"Comparison time by distance from reference\n(dataset {sys.argv[1]})")
     ax1.set_xticks(ax1.get_xticks()[::5])
-    plt.savefig(f"{filename}-refdist2525.png")
+    plt.savefig(f"{filename}-refdist.png")
     plt.close()
 
 
