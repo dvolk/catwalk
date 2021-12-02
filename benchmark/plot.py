@@ -3,7 +3,7 @@
 import json
 import statistics
 import sys
-
+import pandas as pd
 import argh
 import matplotlib.pyplot as plt
 import numpy as np
@@ -71,20 +71,28 @@ def go(filename):
 
     ax1 = plt.gca()
     fig = plt.gcf()
-
+    cross_quartile_average_timings = dict()
+    
     for i, data in enumerate(dataS):
         xs = distances
         ys = list()
         errs = list()
         for distance in distances:
+            cross_quartile_average_timings[distance] = []
+        
             vs = list()
             for v in data:
                 sample_name = v["sample_name"]
                 distance_time = distance_times[distance][sample_name]
-                # express result as search time / number searched: allows comparison rate for TB and covide to be compared directly
+                
+                # express result as search time / number searched: 
+                # allows comparison rate for TB and covid to be compared directly
+                # in microseconds
                 distance_time = distance_time / n_samples_analysed  
                 distance_time = distance_time * 1e6
                 vs.append(distance_time)
+                cross_quartile_average_timings[distance].append(distance_time)
+
             ys.append(statistics.mean(vs))
             errs.append(scipy.stats.sem(vs))
         ax1.plot(
@@ -95,6 +103,15 @@ def go(filename):
             label=f"{i*25}%-{(i+1)*25}%",
         )
 
+    # create a dataset containing the timings, independent of quartile, for each snp distance.
+    for distance in cross_quartile_average_timings.keys():
+        cross_quartile_average_timings[distance] = statistics.mean(cross_quartile_average_timings[distance]) 
+    df = pd.DataFrame.from_dict(cross_quartile_average_timings, orient='index')
+    df.columns = ['timing_usec']
+    save_file = f"{filename}-unknownpos.csv"
+    print(f"saving summary timings across all quantiles to {save_file}")
+    df.to_csv(save_file)
+    
     fig.set_size_inches(width, height)
     plt.xlabel("Comparison distance (SNVs)")
     plt.ylabel("Search time per sample in dataset [micros]")
@@ -125,19 +142,26 @@ def go(filename):
 
     ax1 = plt.gca()
     fig = plt.gcf()
-
+    cross_quartile_average_timings = dict()
+    
     for i, data in enumerate(dataS):
         xs = distances
         ys = list()
         errs = list()
         for distance in distances:
+            cross_quartile_average_timings[distance] = []
             vs = list()
             for v in data:
                 sample_name = v["sample_name"]
                 distance_time = distance_times[distance][sample_name]
-                # express result as search time / number searched: allows comparison rate for TB and covide to be compared directly
-                distance_time = distance_time / n_samples_analysed
+                
+                # express result as search time / number searched: 
+                # allows comparison rate for TB and covid to be compared directly
+                # in microseconds
+                distance_time = distance_time / n_samples_analysed  
                 distance_time = distance_time * 1e6
+                vs.append(distance_time)
+                cross_quartile_average_timings[distance].append(distance_time)
                 vs.append(distance_time)
             ys.append(statistics.mean(vs))
             errs.append(scipy.stats.sem(vs))
@@ -149,6 +173,15 @@ def go(filename):
             label=f"{i*25}%-{(i+1)*25}%",
         )
 
+    # create a dataset containing the timings, independent of quartile, for each snp distance.
+    for distance in cross_quartile_average_timings.keys():
+        cross_quartile_average_timings[distance] = statistics.mean(cross_quartile_average_timings[distance]) 
+    df = pd.DataFrame.from_dict(cross_quartile_average_timings, orient='index')
+    df.columns = ['timing_usec']
+    save_file = f"{filename}-refdist.csv"
+    print(f"saving summary timings across all quantiles to {save_file}")
+    df.to_csv(save_file)
+    
     fig.set_size_inches(width, height)
     plt.xlabel("Comparison distance (SNVs)")
     plt.ylabel("Search time per sample in dataset [micros]")
