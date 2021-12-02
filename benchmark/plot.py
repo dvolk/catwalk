@@ -12,12 +12,17 @@ import scipy.stats
 
 def go(filename):
     """Main function."""
+    
     data = json.loads(open(filename).read())
+    n_samples_analysed = data['number_of_samples']
+    print("Number of samples analysed = ", n_samples_analysed)
     distance_times = data["distance_times"]
     sample_counts = data["sample_counts"]
     distances = distance_times.keys()
     averages = [statistics.mean(row.values()) for row in distance_times.values()]
 
+    width = 4
+    height = 4
     fig = plt.gcf()
     ax1 = fig.add_subplot(111)
 
@@ -28,7 +33,7 @@ def go(filename):
     errors = [scipy.stats.sem(list(row.values())) for row in distance_times.values()]
     plt.xlabel("SNP Distance")
     plt.ylabel("Seconds")
-
+    plt.ylim([0,4])
     ax1.errorbar(
         distances,
         averages,
@@ -39,15 +44,15 @@ def go(filename):
         label="Average time taken for comparison",
     )
 
-    fig.set_size_inches(13, 9)
+    fig.set_size_inches(width, height)
     plt.title(f"Performance for dataset {sys.argv[1]}")
     ax1.set_xticks(ax1.get_xticks()[::5])
-    save_file = f"{filename}-times.svg"
+    save_file = f"{filename}-times.pdf"
     print(f"saving to {save_file}")
     plt.savefig(save_file)
     plt.close()
 
-    # plot 2
+    # plot 2 (labelled A)
     # take the N samples above, sort by number of unknown positions, divide sorted
     # list into quarters and plot average comparison time against distance format
     # the four sets of samples
@@ -76,6 +81,9 @@ def go(filename):
             for v in data:
                 sample_name = v["sample_name"]
                 distance_time = distance_times[distance][sample_name]
+                # express result as search time / number searched: allows comparison rate for TB and covide to be compared directly
+                distance_time = distance_time / n_samples_analysed  
+                distance_time = distance_time * 1e6
                 vs.append(distance_time)
             ys.append(statistics.mean(vs))
             errs.append(scipy.stats.sem(vs))
@@ -87,18 +95,20 @@ def go(filename):
             label=f"{i*25}%-{(i+1)*25}%",
         )
 
-    fig.set_size_inches(13, 9)
-    plt.xlabel("Comparison distance")
-    plt.ylabel("Time [s]")
+    fig.set_size_inches(width, height)
+    plt.xlabel("Comparison distance (SNVs)")
+    plt.ylabel("Search time per sample in dataset [micros]")
     ax1.legend()
-    plt.title(f"Comparison time for # of unknown positions\n(dataset {sys.argv[1]})")
+    #plt.title(f"Comparison time for # of unknown positions\n(dataset {sys.argv[1]})")
+    plt.title(f"A")
+    plt.ylim([0,4])
     ax1.set_xticks(ax1.get_xticks()[::5])
-    save_file = f"{filename}-unknownpos.svg"
+    save_file = f"{filename}-unknownpos.pdf"
     print(f"saving to {save_file}")
     plt.savefig(save_file)
     plt.close()
 
-    # plot 3
+    # plot 3 (labelled 'B')
     # take the N samples above, sort by distance from reference, divide sorted
     # list into quarters and plot average comparison time against distance format
     # the four sets of samples
@@ -125,6 +135,9 @@ def go(filename):
             for v in data:
                 sample_name = v["sample_name"]
                 distance_time = distance_times[distance][sample_name]
+                # express result as search time / number searched: allows comparison rate for TB and covide to be compared directly
+                distance_time = distance_time / n_samples_analysed
+                distance_time = distance_time * 1e6
                 vs.append(distance_time)
             ys.append(statistics.mean(vs))
             errs.append(scipy.stats.sem(vs))
@@ -136,13 +149,15 @@ def go(filename):
             label=f"{i*25}%-{(i+1)*25}%",
         )
 
-    fig.set_size_inches(13, 9)
-    plt.xlabel("Comparison distance")
-    plt.ylabel("Time [s]")
+    fig.set_size_inches(width, height)
+    plt.xlabel("Comparison distance (SNVs)")
+    plt.ylabel("Search time per sample in dataset [micros]")
     ax1.legend()
-    plt.title(f"Comparison time by distance from reference\n(dataset {sys.argv[1]})")
+    #plt.title(f"Comparison time by distance from reference\n(dataset {sys.argv[1]})")
+    plt.title(f"B")
+    plt.ylim([0,4])
     ax1.set_xticks(ax1.get_xticks()[::5])
-    save_file = f"{filename}-refdist.svg"
+    save_file = f"{filename}-refdist.pdf"
     print(f"saving to {save_file}")
     plt.savefig(save_file)
     plt.close()
