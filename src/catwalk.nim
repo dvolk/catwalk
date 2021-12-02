@@ -92,7 +92,7 @@ proc reference_compress*(sample_sequence: string, ref_sequence: string, mask: Ma
 
   if sample_sequence.len != ref_sequence.len:
     sample.status = InvalidLength
-    return
+    return sample
 
   for i in 0..ref_sequence.high:
     if sample_sequence[i] != ref_sequence[i] and not mask.positions.contains(i):
