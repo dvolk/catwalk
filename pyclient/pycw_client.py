@@ -152,7 +152,7 @@ in either
 
     def _running_servers(self):
         """ returns details of running servers matching the details of this server
-        
+
         There should be either 0 or 1 of these only """
 
         servers = []
@@ -167,7 +167,7 @@ in either
 
     def server_is_running(self):
         """returns true if the relevant process is running, otherwise false.
-        
+
         The alternative strategy, returning true if a response is received by the server,
         can result in reporting false if the server is busy """
 
@@ -179,7 +179,7 @@ in either
             return True
         else:
             raise CatWalkMultipleServersRunningError(message = "{0} servers with specification {1} detected".format(len(servers), self.instance_stem))      # there cannot be multiple servers running
-            
+
     def start(self):
         """starts a catwalk process in the background"""
         cw_binary_filepath = shlex.quote(self.cw_binary_filepath)
@@ -308,7 +308,7 @@ in either
         if not distance:
             logging.warning("no distance supplied. Using 99")
             distance = 99
-        
+
         distance = int(distance)        # if a float, url contstruction may fail
 
         r = requests.get("{0}/neighbours/{1}/{2}".format(self.cw_url, name, distance))
@@ -319,5 +319,11 @@ in either
     def sample_names(self):
         """get a list of samples in catwalk"""
         r = requests.get("{0}/list_samples".format(self.cw_url))
+        r.raise_for_status()
+        return r.json()
+
+    def sample_ok_names(self):
+        """get a list of samples in catwalk with 'Ok' status"""
+        r = requests.get("{0}/list_ok_samples".format(self.cw_url))
         r.raise_for_status()
         return r.json()

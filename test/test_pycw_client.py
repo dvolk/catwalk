@@ -183,4 +183,30 @@ class test_cw_4(test_cw):
 
         # add guid2 again
         self.cw.add_sample_from_refcomp("guid2", payload2)
-        self.assertEqual(set(self.cw.sample_names()), set(['guid2']))  # order doesn't matter
+        self.assertEqual(
+            set(self.cw.sample_names()), set(["guid2"])
+        )  # order doesn't matter
+
+
+class test_cw_5(test_cw):
+    """tests list_ok_samples"""
+
+    def runTest(self):
+
+        payload1 = {
+            "A": [1000, 1001, 1002],
+            "G": [],
+            "T": [],
+            "C": [],
+            "N": [20000, 20001, 20002],
+        }
+        payload2 = {"A": [], "G": [], "T": [], "C": [], "N": list(range(140000))}
+        self.cw.add_sample_from_refcomp("guid1", payload1)
+        self.cw.add_sample_from_refcomp("guid2", payload2)
+
+        self.assertEqual(
+            set(self.cw.sample_names()), set(["guid1", "guid2"])
+        )  # order doesn't matter
+        self.assertEqual(
+            set(self.cw.sample_ok_names()), set(["guid1"])
+        )  # order doesn't matter
