@@ -73,11 +73,18 @@ Nim Compiler Version 1.4.8 [Linux: amd64]
 
 ### Building (Compiling) Catwalk
 
-in the catwalk directory, run:
+in the catwalk directory, run one of these:  
+**option 1**: the catwalk server will keep a record of sequences loaded into it on disc, and automatically reload on startup.  See *Cache* section below.  
 
-    nimble build -d:release -d:danger
+    nimble -y build -d:release -d:danger
+ 
+or  
+**option 2**: the catwalk server will not keep a record of files loaded into it.  On restart, the client will need to reload records  
+ 
+    nimble -y build -d:release -d:danger -d:no_serialisation
 
-This creates four binaries: `cw_server`, `cw_client`, `cw_webui`, `refcompress`
+
+Both options creates four binaries: `cw_server`, `cw_client`, `cw_webui`, `refcompress`.
 
 Catwalk is a server application.  The Catwalk server `cw_server` stores the sequences and performs distance computations.
 
