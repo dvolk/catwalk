@@ -78,6 +78,14 @@ proc add_position(cs: var CompressedSequence, base: char, position: int) {.inlin
     else: 4
   cs[index].add(position)
 
+proc uppercase_acgt(base: char): char {.inline.} =
+  case base:
+    of 'a': 'A'
+    of 'c': 'C'
+    of 'g': 'G'
+    of 't': 'T'
+    else: base
+
 #
 # Sample
 #
@@ -99,7 +107,7 @@ proc reference_compress*(sample_sequence: string, ref_sequence: string, mask: Ma
     return sample
 
   for i in 0..ref_sequence.high:
-    if sample_sequence[i] != ref_sequence[i] and not mask.positions.contains(i):
+    if sample_sequence[i].uppercase_acgt() != ref_sequence[i] and not mask.positions.contains(i):
       if is_n_position(sample_sequence[i]):
         sample.n_positions.incl(i)
       else:
