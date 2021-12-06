@@ -11,7 +11,7 @@ import argh
 
 
 def start_test_catwalk():
-    os.system("echo -n '>test\nACGTACGT' > test.ref")
+    os.system("echo -n '>test\nACgTAcGT' > test.ref")
     os.system("touch test.mask")
     os.system(
         "../cw_server --instance_name=test --reference_filepath=test.ref --mask-filepath=test.mask &"

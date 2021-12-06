@@ -87,6 +87,14 @@ proc uppercase_acgt(base: char): char {.inline.} =
     of 't': 'T'
     else: base
 
+
+proc uppercase_seq(sequence: string): string =
+  result = sequence
+  for i, ch in sequence.pairs:
+    result[i] = uppercase_acgt(ch)
+  return result
+
+
 #
 # Sample
 #
@@ -141,7 +149,7 @@ proc new_Mask*(mask_name: string, mask_str: string): Mask =
 proc new_CatWalk*(name: string, reference_name: string, reference_sequence: string, mask: Mask, max_n_positions: int) : CatWalk =
   result.name = name
   result.reference_name = reference_name
-  result.reference_sequence = reference_sequence
+  result.reference_sequence = uppercase_seq(reference_sequence)
   result.mask = mask
   result.max_n_positions = max_n_positions
   result.active_samples = newTable[int, Sample]()
