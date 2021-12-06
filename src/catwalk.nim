@@ -1,6 +1,7 @@
 import tables
 import intsets
 import strutils
+import strformat
 import times
 import jsony
 import algorithm
@@ -131,7 +132,7 @@ proc new_Mask*(mask_name: string, mask_str: string): Mask =
     try:
       result.positions.incl(parseInt(line))
     except ValueError:
-      echo "Not an integer: '" & line & "'"
+      echo fmt"Mask line is not an integer: '{line}'"
 
 #
 # CatWalk
