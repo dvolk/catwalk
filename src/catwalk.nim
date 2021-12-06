@@ -71,6 +71,10 @@ proc add_position(cs: var CompressedSequence, base: char, position: int) {.inlin
     of 'C': 1
     of 'G': 2
     of 'T': 3
+    of 'a': 0
+    of 'c': 1
+    of 'g': 2
+    of 't': 3
     else: 4
   cs[index].add(position)
 
@@ -84,7 +88,7 @@ proc new_Sample*(): Sample =
   result.status = Unknown
 
 proc is_n_position(c: char): bool {.inline.} =
-  c != 'A' and c != 'C' and c != 'G' and c != 'T'
+  c != 'A' and c != 'C' and c != 'G' and c != 'T' and c != 'a' and c != 'c' and c != 'g' and c != 'T'
 
 proc reference_compress*(sample_sequence: string, ref_sequence: string, mask: Mask, max_n_positions: int): Sample =
   var
