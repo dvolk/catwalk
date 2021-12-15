@@ -47,14 +47,18 @@ eg.:
 
 ## Look at result
 
-eg.:
-
-    cog_test.json-acgt_corr.png
-    cog_test.json-refdist2525.png
-    cog_test.json-unknownpos2525.png
+    cog_test.json
+    cog_test.json-refdist.pdf
+    cog_test.json-times.pdf
+    cog_test.json-unknownpos.pdf 
 
 ## (Optional) Convert result JSON to csv
 
 eg.:
 
     python3 bench2csv.py cog_test.json
+
+The resulting csv are:
+
+    cog_test.json-stats.csv
+    cog_test.json-times.csv
