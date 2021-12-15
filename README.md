@@ -19,7 +19,7 @@ Catwalk queries are fast:
 * To compare one *M. tuberculosis* sample against another takes about 0.7 microseconds.
 * So to find close neighbours of a sequence from a million sequences takes under a second. 
 
-The speed of comparison depends on the distance of the test samples from the reference, and the number of unknown bases in the sequence.  Simulated data illustrating this is [available](doc/simulated_benchmark.md)
+The speed of comparison depends on the distance of the test samples from the reference, and the number of unknown bases in the sequence.  
 
 ## Context
 There is a public health need to rapidly identify sequences which may form part of transmission chains, or which may represent importations across national boundaries amidst large numbers of SARS-CoV-2 and other microbial sequences.   
@@ -104,7 +104,7 @@ Example:
 
 ### Unit tests
 
-Using a python virtual environment, run tests through python client [TODO]
+Using a python virtual environment, run tests through python client
 
     pipenv install
     ./run_tests.sh
