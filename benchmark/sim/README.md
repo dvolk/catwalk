@@ -2,7 +2,7 @@
 
 ## Method
 ### Simulated data set analysed
-To analyse the performance of Catwalk using simulated data, we used a 1,000 sample set derived by computational "evolution" from the Wuhan reference strain, under a coalecent model, using parameters derived from the observed evolution of SARS-CoV-2 in England.  SARS-CoV-2 mutates at a rate of about 2 SNV every 2 weeks, so most of the samples are within 25 SNV of the reference, given the duration of the simulation.The phylogenetic tree of the synthetic samples is as below.  The [synthetic data](sim0.fasta) and [newick tree](truth0.nwk) are included.  
+To analyse the performance of Catwalk using simulated data, we used a 1,000 sample set derived by computational "evolution" from the Wuhan reference strain, under a coalecent model, using parameters derived from the observed evolution of SARS-CoV-2 in England.  SARS-CoV-2 mutates at a rate of about 2 SNV every 2 weeks, so most of the samples are within 25 SNV of the reference, given the duration of the simulation.The phylogenetic tree of the synthetic samples is as below.  The [synthetic data](sim0.fasta.gz) and [newick tree](truth0.nwk) are included.  
 
 ![Phylogenetic tree of synthetic data](simulated_tree_white_bkg.png)
 
