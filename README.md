@@ -108,7 +108,7 @@ Example:
 
 ### Unit tests
 
-Using a python virtual environment, run tests through python client [TODO]
+Using a python virtual environment, run tests through python client
 
     pipenv install
     ./run_tests.sh
