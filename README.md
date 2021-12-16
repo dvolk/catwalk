@@ -2,7 +2,7 @@
 
 ![example workflow](https://github.com/dvolk/catwalk/actions/workflows/test_cw.yml/badge.svg)
 
-cw_webui font page             |  cw_webui sample page
+cw_webui front page             |  cw_webui sample page
 :-------------------------:|:-------------------------:
 ![cw_webui screenshot](https://i.imgur.com/nCdxbXB.png)| ![cw_webui screenshot sample](https://i.imgur.com/hWqTxek.png)
 
