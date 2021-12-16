@@ -30,7 +30,7 @@
       <li>Name: ${info["name"].getStr()}</li>
       <li>Reference: ${info["reference_name"].getStr()}</li>
       <li>Mask: ${info["mask_name"].getStr()}</li>
-      <li>Maximum distance: ${info["max_distance"]}</li>
+      <li>Maximum unknown positions: ${info["max_n_positions"]}</li>
       <li>Samples: ${info["n_samples"]}</li>
       <li>Memory used: ${(info["occupied_mem"].getInt() / 1_000_000).int} mb</li>
     </ul>
