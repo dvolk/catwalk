@@ -227,7 +227,7 @@ Remove a sample from catwalk
 
 ## Benchmarks
 
-Please see `benchmark` directory readme.
+Scripts used for benchmarking are [here](benchmark/README.md)
 
 ## Publications
-A publication on CatWalk is in progress [ADD MedRxiv link - TODO]
+A publication on CatWalk has been submitted.
