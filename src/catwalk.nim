@@ -207,7 +207,7 @@ proc dump_sample*(c: var CatWalk, sample_name: string): string =
 let measure = false
 
 proc register_sample(c: var CatWalk, sample: Sample, name: string) =
-  let sample_index = len(c.all_sample_indexes)
+  let sample_index = len(c.active_samples)
   c.all_sample_indexes[name] = sample_index
   c.all_sample_names[sample_index] = name
   c.active_samples[sample_index] = sample
@@ -237,6 +237,8 @@ proc remove_sample*(c: var CatWalk, name: string) =
   c.active_samples[sample_id].diffsets.empty_compressed_sequence()
   c.active_samples[sample_id].n_positions = initIntSet()
   c.active_samples[sample_id].status = Removed
+  c.all_sample_names.del(sample_id)
+  c.all_sample_indexes.del(name)
 
 
 proc add_sample_from_refcomp*(c: var CatWalk, name: string, refcomp_json: string, keep: bool) =
