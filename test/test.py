@@ -88,7 +88,7 @@ def go():
     r = add_sample_to_catwalk("test2l", "aCgTAcGg")
     assert r.status_code == 201
     n2l = get_neighbours("test2l", 50)
-    assert n2l == [["test1", "1"], ["test2", "0"]]
+    assert n2l == [["test3", "1"], ["test1", "1"], ["test2", "0"]]
 
     print(get_debug())
     print(get_sample_list())
