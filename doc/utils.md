@@ -1,20 +1,18 @@
 ## Utilities
 
-Various utilities are provided which use the Catwalk server.
+Various utilities used during development of the software are included.
 
 ### utils/make_mfsl.py
-Convert a directory of fasta files into a single 'two-line' multifasta format.  [Example usage](use.md)
+Example script converting all fasta files in a single directory  into a single 'two-line' multifasta format.  [Example usage](use.md)
 
 ### utils/verify.py
-
-Given a reference, a mask file and two samples, check the difference between the samples in different ways.
+Compares output from Catwalk with that from a python algorithm implementing of snp distance computation, used to test Catwalk outputs.  Given a reference, a mask file and two samples, determines the snp distance between the samples.
 
 ### utils/compare_neighbours.py
-
-Get all neighbours from different relateness services and compare them. Useful for comparing identical datasets processed in different ways for QC purposes.
+Compares output from Catwalk with that from findNeighbour3 https://github.com/davidhwyllie/findNeighbour3, a python server implementing reference based compression and SNV computation.  Used for quality control of catwalk software.
 
 ### utils/clusters.py
-
+Experimental software which draws a network illustrating links between samples.
 Use networkx to create a cluster graph
 
 #### Example: making a cluster graph png

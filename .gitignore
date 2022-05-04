@@ -19,3 +19,5 @@ refcompress
 .Rproj.user
 nim*
 .bashrc
+small_test*.*
+benchmark/benchmark_downsample.fasta

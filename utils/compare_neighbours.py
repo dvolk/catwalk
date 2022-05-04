@@ -1,8 +1,10 @@
-"""Compare neighbours from different servers."""
+"""Compare neighbours from catwalk vs. findneighbour3, a 
+   python based server implementing reference based compression and
+   SNV computation https://github.com/davidhwyllie/findNeighbour3 
+   """
 
 import collections
 import json
-
 import argh
 import requests
 

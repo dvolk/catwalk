@@ -9,12 +9,7 @@
 
 * The software requires version >= 1.4.8 of Nim. 
 
-#### Options for installation:
-* See the [Nim installation instructions](https://nim-lang.org/install.html) from the Nim development team
-* Package managers may contain nim ```sudo apt install nim``` but these tend to lag behind the language releases.
-* There are instructions for [using conda](https://anaconda.org/conda-forge/nim), and approach we have not tested. 
-
-#### Recommended method
+#### Recommended installation method
 
 The following approach works on bash linux systems, and is the one we have used. It assumes you are putting nim in the home directory, but you can edit the paths below as necessary.
 
@@ -45,16 +40,21 @@ echo 'PATH=$PATH:/home/yourusername/.nimble/bin' >> .bashrc
 ```
 source ~/.bashrc
 ```
-6. Confirm it's working:
+6. Confirm it is working:
 ```
 $ nim -v
 Nim Compiler Version 1.4.8 [Linux: amd64]
 ```
 
+#### Other options for installation:
+* See the [Nim installation instructions](https://nim-lang.org/install.html) from the Nim development team
+* Package managers may contain nim ```sudo apt install nim``` but these tend to lag behind the language releases.
+* There are instructions for [using conda](https://anaconda.org/conda-forge/nim), an approach we have not tested. 
+
 ### Building (Compiling) Catwalk
 
 Catwalk can be compiled in two modes.   
-In the catwalk directory, run one of these:  
+In the catwalk directory into which you have cloned the repository, run one of these commands:  
 
 **option 1**: the catwalk server will keep a record of sequences loaded into it in a [cache](cache.md), comprising flat files on disc, and automatically reload on startup. 
 
@@ -71,14 +71,12 @@ Either option will work for unit testing.
 Both options create four binaries: `cw_server`, `cw_client`, `cw_webui`, `refcompress`.
 
 #### Compiler Warnings
-Various compiler warnings may be issued.  These can be ignored.  
+Various compiler warnings may be issued by recent Nim versions.  These can be safely ignored.  
 
 #### Expected output
 Catwalk is a server application.  The Catwalk server `cw_server` stores the sequences in RAM and performs distance computations.
 
 The `cw_client` and `cw_webui`, applications target the server using a command line and Web User interface ,respectively.
-
-`refcompress` is a helper application.
 
 Use of these applications is described [here](use.md)
 

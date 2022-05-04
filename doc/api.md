@@ -1,7 +1,17 @@
-## HTTP API
+## REST API
 
 Catwalk provides the following HTTP API endpoints (examples are given with the Python Requests library, and assume the server is running on port 5000).
 
+Before running these examples, your script will need to import the requests and json libraries, and set the sample_name variable.
+
+```
+import requests
+import json
+
+sample_name = "seq1"
+# a genome comprising only Ts. the reference genome in the example is 29903 nt long
+sequence = "T"*29903       
+```
 ### /info
 
 Returns server information such which reference is used, memory used, version, etc.
@@ -19,7 +29,7 @@ Returns a JSON array of sample names loaded into the server.
 Add a sample to catwalk
 
     >>> requests.post("http://localhost:5000/add_sample", json={ "name": sample_name,
-                                                                 "sequence": "ACGTACGT",
+                                                                 "sequence": sequence,
                                                                  "keep": True })
 
 ### /neighbours/<sample_name>/<distance>
@@ -56,7 +66,7 @@ Add a sequence, supplying not a complete sequence (as in a fasta file), but just
 
 Remove a sample from catwalk
 
-    >>> requests.get("http://localhost:5000/remove_sample/sample_name")
+    >>> requests.get("http://localhost:5000/remove_sample/{0}".format(sample_name))
 
 ## Python client
 ### 

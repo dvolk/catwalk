@@ -7,4 +7,4 @@ Catwalk queries are fast:
 
 The speed of comparison depends on the distance of the test samples from the reference, and the number of unknown bases in the sequence.  
 
-Simulated data illustrating this is [available](../benchmark/sim/simulation_results.md)
+Simulated data illustrating this is [available](../benchmark/sim/simulation_results.md).
