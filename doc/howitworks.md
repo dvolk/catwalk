@@ -31,9 +31,10 @@ dist(S1,S2) = 0
 ## What data is it designed to work on?
 It is designed to work on consensus nucleotide sequences obtained by mapping sequencer output to single fixed-length consensus genome, and then calling a single consensus base at each position.
 
-This can be supplied in two ways:
-* fasta files.  This is recommended method.  
-* differences from the reference genome.  A more detailed description of how these can be computed is [here](refcomp.md).
+This can be supplied in three ways:
+* fasta files, including multi-fasta files.  Please see the [/add_samples_from_mfsl](api.md) endpoint.
+* a sequence name, and a string sequence.  Please see the [/add_sample](api.md) endpoint .
+* differences from the reference genome.  A more detailed description of how these can be computed is [here](refcomp.md).  Please see also the [/add_sample_from_refcomp](api.md).
 
 ## How does it work internally?
 It computes and stores variation of each sequence against the reference.  It uses the reference compressed differences directly in fast distance computation.  These sequences are stored in RAM.
@@ -62,17 +63,17 @@ This the genome to which the consensus sequences are mapped.  Typically, it is c
 
 You may wish to work with a 'pseudogenome' in which contigs are concatenated.  Often, synthetic gaps of N characters are added where the contigs are concatenated.  Such pseudogenomes can be used as reference, but the N characters must be masked. 
 
-[Example 1 : SARS-CoV-2](https://www.ncbi.nlm.nih.gov/nuccore/NC_045512.2?report=fasta)
-[Example 2: H37Rv (TB) v3 genome](reference/TB-ref.fasta)
+[Example 1 : SARS-CoV-2](https://www.ncbi.nlm.nih.gov/nuccore/NC_045512.2?report=fasta)  
+[Example 2: H37Rv (TB) v3 genome](reference/TB-ref.fasta)  
 
 ## What is a 'mask file'
-Commonly, there are regions of the genome where mapping is known to be problematic.  Such regions are typically ignored during single nucleotide variation calculation.  A mask file can be supplied to the server.  Differences in regions which are specified in the mask are ignored in single nucleotide computations.
+Commonly, there are regions of the genome where mapping is known to be problematic.  Such regions are typically ignored during single nucleotide variation calculation.  A mask file can be supplied to the server and specifies which regions should be ignored, if any.  A mask file is always required, but if no masking is desired, the file can be empty..  Differences in regions which are specified in the mask are ignored in single nucleotide computations.
 
-The mask file itself is very simple.  It is always required, but can be
-* [an empty file](reference/nil.txt)
-* a text file containing zero indexed positions of the reference file to be excluded integer positions.
-[Example for SARS-CoV-2](reference/covid-exclude.txt)  
-[Example for *M. tuberculosis*](reference/TB-exclude-adaptive.txt)
+The mask file itself is very simple in format.  It is always required, but can be
+* [an empty file](../reference/nil.txt).  Such files can be created very easily using ```touch``` which creates and empty file.  Example: ```touch my_new_exclusion_file.txt```
+* a text file containing zero indexed positions of the reference file to be excluded, one on each line.  
+[Example for SARS-CoV-2](../reference/covid-exclude.txt)    
+[Example for *M. tuberculosis*](../reference/TB-exclude-adaptive.txt)  
 
 
 ## What does reference to 'max_n_positions's refer to?
@@ -100,5 +101,4 @@ No.  This is because benchmarking indicates that it is often faster to recompute
 ## Does it handle IUPAC (ambiguity) codes?
 No.  Only A,C,G,T,N and - characters are accepted.  If you need to handle ambiguity, please see  [findNeighbour4](https://github.com/davidhwyllie/findNeighbour4).  This service ignores IUPAC codes in nucleotide distance computations, but it does store them and uses them in various quality/mixture calculations.
 
-## Are the web services synchronous?
-Yes, they are synchronous, and interactions are blocking for server.  This limits throughtput.  If you need higher server performance and non-blocking API reads, please see  [findNeighbour4](https://github.com/davidhwyllie/findNeighbour4).
+W

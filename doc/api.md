@@ -49,7 +49,7 @@ The filepath must be readable from the catwalk server.
 This is faster than sending the sequences over HTTP with /add_sample. For maximum performance, use fast storage such as SSD drives.  [Example usage](doc/use.md)
 
 ### /add_sample_from_refcomp
-Add a sequence, supplying not a complete sequence (as in a fasta file), but just differences from the reference sequence.  Here is an example where there is an A at 10,11,12 and a G at 13,14 relative to the reference.
+Add a sequence, supplying not a complete sequence (as in a fasta file), but just differences from the reference sequence.  Such difference could (for example) be computed from a vcf file, or from a .tab file containing sequence variation as required. However, note that the positions supplied must be 0-indexed, not 1 indexed as in vcf files.  Here is an example where there is an A at 10,11,12 and a G at 13,14 relative to the reference.
 
     >>> ref_compressed_sequence = {
         'A':[10,11,12],
