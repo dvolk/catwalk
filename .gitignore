@@ -17,3 +17,5 @@ Pipfile.lock
 refcompress
 *out
 .Rproj.user
+nim*
+.bashrc

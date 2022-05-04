@@ -1,7 +1,8 @@
 """Generate random sequences for benchmarking.
 
-This script generates a multifasta file potentially useful for benchmarking catwalk. It
-generates a reference genome and mutates the reference and future samples to generate
+This script generates a multifasta file potentially useful for benchmarking catwalk. 
+
+It generates a reference genome and mutates the reference and future samples to generate
 more samples. 10% of samples are saved for future mutation.
 
 Parameters (and defaults):
