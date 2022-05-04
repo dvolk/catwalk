@@ -5,8 +5,7 @@ author        = "Denis Volk"
 description   = "Cat walk"
 license       = "AGPL"
 srcDir        = "src"
-bin           = @["cw_server", "cw_client", "cw_webui", "refcompress"]
-
+bin           = @["cw_server", "cw_client", "cw_webui"]
 
 
 # Dependencies

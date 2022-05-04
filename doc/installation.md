@@ -68,7 +68,7 @@ or
 
 Either option will work for unit testing. 
 
-Both options create four binaries: `cw_server`, `cw_client`, `cw_webui`, `refcompress`.
+Both options create three binaries: `cw_server`, `cw_client`, `cw_webui`.
 
 #### Compiler Warnings
 Various compiler warnings may be issued by recent Nim versions.  These can be safely ignored.  
