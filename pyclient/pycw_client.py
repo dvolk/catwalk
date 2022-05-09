@@ -1,7 +1,7 @@
 """
 A catwalk client for python
 
-Tested on Linux with python 3.9
+Tested on Linux with python 3.8, 3.9 and 3.10
 Uses linux-specific commands to run the server, so is not expected to work on Windows.
 
 unittests:

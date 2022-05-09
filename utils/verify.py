@@ -2,7 +2,6 @@
 distance verification."""
 
 import unittest
-
 import argh
 
 

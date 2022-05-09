@@ -17,9 +17,9 @@ jobs:
     - uses: actions/checkout@v2
     - name: Setup Nim
       run: |
-        wget https://nim-lang.org/download/nim-1.6.0-linux_x64.tar.xz
-        tar -xf nim-1.6.0-linux_x64.tar.xz
-        NIMDIR="`pwd`/nim-1.6.0/bin"
+        wget https://nim-lang.org/download/nim-1.6.4-linux_x64.tar.xz
+        tar -xf nim-1.6.4-linux_x64.tar.xz
+        NIMDIR="`pwd`/nim-1.6.4/bin"
         # Append to PATH
         echo "$NIMDIR" >> $GITHUB_PATH
     - name: check nimble is available

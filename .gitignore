@@ -11,9 +11,12 @@ utils/old
 cw_server
 cw_client
 cw_webui
-nim*
 .env
 Pipfile.lock
 refcompress
 *out
 .Rproj.user
+nim*
+.bashrc
+small_test*.*
+benchmark/benchmark_downsample.fasta

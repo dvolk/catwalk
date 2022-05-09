@@ -140,7 +140,9 @@ proc new_Mask*(mask_name: string, mask_str: string): Mask =
     try:
       result.positions.incl(parseInt(line))
     except ValueError:
-      echo fmt"Mask line is not an integer: '{line}'"
+      # ignore empty lines
+      if  len(line) > 0:
+        echo fmt"Warning: Mask line is not an integer; mask files should contain a list of 0-indexed integer positions '{line}'"
 
 #
 # CatWalk
@@ -186,7 +188,6 @@ proc get_neighbours*(c: var CatWalk, sample_name: string, distance: int) : seq[(
   for (neighbour_index, distance) in neighbours:
     result.add((c.all_sample_names[neighbour_index], distance))
 
-
 proc get_sample_counts*(c: var CatWalk, sample_name: string): Table[string, int] =
   let
     sample_index = c.all_sample_indexes[sample_name]
@@ -196,7 +197,6 @@ proc get_sample_counts*(c: var CatWalk, sample_name: string): Table[string, int]
     "C": sample.diffsets[1].len(),
     "G": sample.diffsets[2].len(),
     "T": sample.diffsets[3].len() }.toTable()
-
 
 proc dump_sample*(c: var CatWalk, sample_name: string): string =
   let

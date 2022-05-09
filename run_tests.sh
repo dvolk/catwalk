@@ -11,13 +11,14 @@
 rm -rf cw_server
 rm -rf cw_webui
 rm -rf cw_client
-rm -rf nim_software
 rm nim_software -rf
+
 mkdir nim_software
 cd nim_software
-wget https://nim-lang.org/download/nim-1.4.8-linux_x64.tar.xz
-tar -xf nim-1.4.8-linux_x64.tar.xz
-NIMDIR="`pwd`/nim-1.4.8/bin"
+wget https://nim-lang.org/download/nim-1.6.4-linux_x64.tar.xz
+tar -xf nim-1.6.4-linux_x64.tar.xz
+
+NIMDIR="`pwd`/nim-1.6.4/bin"
 #echo "$NIMDIR" >> $GITHUB_PATH
 
 # test whether NIMDIR is on path; add if not
@@ -37,13 +38,6 @@ nimble -y build -d:release -d:danger -d:no_serialisation
 rm .env -f
 echo CW_BINARY_FILEPATH=\"`pwd`/cw_server\" > .env
 
-# test    
+# test   
 pipenv run pytest test
 
-# cleanup
-#rm -rf cw_server
-#rm -rf cw_webui
-#rm -rf cw_client
-#rm -rf nim_software
-
-        

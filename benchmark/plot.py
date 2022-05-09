@@ -95,6 +95,10 @@ def go(filename):
             label=f"{i*25}%-{(i+1)*25}%",
         )
 
+    # report standard errors
+    for mean, stderr in zip(ys,errs):
+        print(mean,stderr, stderr/mean)
+
     fig.set_size_inches(width, height)
     plt.xlabel("Comparison distance (SNVs)")
     plt.ylabel("Search time per sample in dataset [micros]")
