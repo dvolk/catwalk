@@ -6,7 +6,7 @@ These scripts were used for benchmarking catwalk for the Publication.
 
 Benchmarking requires a multifasta file containing genomes, and a fasta file containing the reference genome against which mapping occurred.  
 
-To illustrate the performance of the software, we provide a 1% random downsample of the SARS-CoV-2 COG-UK sequence data set containing 22,133 sequences.  The patterns observed in this small dataset are very similar to larger bodies of data.  This is can be extracted as follows:
+To illustrate the performance of the software, we provide a 1% random downsample of the SARS-CoV-2 COG-UK sequence data set containing 22,133 sequences.  The patterns of performance observed in this small dataset are very similar to those seen in much larger bodies of data.  The test data can be extracted as follows:
 
 ``` bunzip2 --keep benchmark/benchmark_downsample.fasta.bz2 ```
 
@@ -19,7 +19,7 @@ In the publication, we used the following data sets:
 
 ## Convert fasta files into fasta-2line multifasta format
 
-(not needed if it's already in this format, which the SARS-CoV-2 sequence data is)
+(not needed if your data is already in fasta-2line format, which the SARS-CoV-2 sequence data is)
 ```
     python3 make_mfsl.py <fasta_dir>
 ```
