@@ -4,13 +4,14 @@
 It is a server application.  The server, once started, will remain running until terminated.  The server can be started with a command line operation.
 
 ## How the server accessible?
-HTTP REST-API
-Command line client
+It is available via either  
+* HTTP REST-API, or   
+* Command line client
 
 ## What does it calculate?
-It calculates pairwise single nucleotide variation between sequences mapped to a fixed length reference genome.  Uncertain or missing bases are ignored.  
+It calculates pairwise single nucleotide variation between sequences mapped to a fixed length reference genome.  Uncertain or missing bases, denoted as N or - respectively, are ignored in computations.  
 
-For example, suppose we have two genomes
+For example, suppose we have two genomes both six nucleotides long:
 ```
 >S1
 ACGTAT
@@ -29,12 +30,14 @@ ACGTAN
 dist(S1,S2) = 0
 
 ## What data is it designed to work on?
-It is designed to work on consensus nucleotide sequences obtained by mapping sequencer output to single fixed-length consensus genome, and then calling a single consensus base at each position.
+It is designed to work on consensus nucleotide sequences obtained by mapping sequencer output to fixed-length consensus genome, and then calling a single consensus base at each position.
 
 This can be supplied in three ways:
-* fasta files, including multi-fasta files.  Please see the [/add_samples_from_mfsl](api.md) endpoint.
-* a sequence name, and a string sequence.  Please see the [/add_sample](api.md) endpoint .
-* differences from the reference genome.  A more detailed description of how these can be computed is [here](refcomp.md).  Please see also the [/add_sample_from_refcomp](api.md).
+* fasta files, including multi-fasta files.  Please see the [/add_samples_from_mfsl](api.md) endpoint documentation.  In this case, the length of the sequence supplied must be exactly the same as the reference sequence.
+* a sequence name, and a string containing the sequence.  Please see the [/add_sample](api.md) endpoint documentation.  In this case, the length of the sequence supplied must be exactly the same as the reference sequence.
+* differences from the reference genome.  These may be relatively few, so this representation may be much smaller than in the fasta representations.  Please see a more detailed description of how these can be represented is [here](refcomp.md); please note that (unlike a VCF file, which is 1-indexed) in the representation required, zero-indexed variant positions are required.  Please see also the [/add_sample_from_refcomp](api.md) endpoint documentation, which describes how these differences can be supplied to the server.
+
+For more details on acceptable reference genome representations, please see below.  
 
 ## How does it work internally?
 It computes and stores variation of each sequence against the reference.  It uses the reference compressed differences directly in fast distance computation.  These sequences are stored in RAM.
@@ -59,15 +62,15 @@ The parameters are as follows:
 **mask-filepath**: the path to a text file containing zero-indexed positions in the reference genome to be ignored by the server.  See also 'mask file' below.
 
 ## What is a 'reference file'
-This the genome to which the consensus sequences are mapped.  Typically, it is closed genome from Genbank.  It must contain only A,C,G,T characters in unmasked positions; case is ignored.
-
-You may wish to work with a 'pseudogenome' in which contigs are concatenated.  Often, synthetic gaps of N characters are added where the contigs are concatenated.  Such pseudogenomes can be used as reference, but the N characters must be masked. 
+This a fasta file containing the genome to which the consensus sequences are mapped.  Typically, it is a closed genome comprising a single bacterial chromosome from Genbank.  It must contain only A,C,G,T characters in unmasked positions; case of characters supplied is ignored.
 
 [Example 1 : SARS-CoV-2](https://www.ncbi.nlm.nih.gov/nuccore/NC_045512.2?report=fasta)  
 [Example 2: H37Rv (TB) v3 genome](reference/TB-ref.fasta)  
 
+Alternatively, you may wish to work with a 'pseudogenome' in which contigs from a bacterial genome assembly are concatenated, or with concatenations of a single chromosome and extrachromosomal (e.g. plasmid) elements.  Often, synthetic gaps of N characters are added where the contigs are joined into a single 'pseudogenome'.  Fasta files containing such pseudogenomes can be used as a reference file, but the N characters at the join points must be masked.  For examples of how such masking is achieved, please see the 'mask file' section below.
+
 ## What is a 'mask file'
-Commonly, there are regions of the genome where mapping is known to be problematic.  Such regions are typically ignored during single nucleotide variation calculation.  A mask file can be supplied to the server and specifies which regions should be ignored, if any.  A mask file is always required, but if no masking is desired, the file can be empty..  Differences in regions which are specified in the mask are ignored in single nucleotide computations.
+Commonly, there are regions of the genome where mapping is known to be problematic, such as regions with homopolymeric or other types of repeat.  Such regions are typically ignored during single nucleotide variation calculation.  A mask file can be supplied to the server; this file specifies which regions should be ignored, if any.  A mask file is always required, but if no masking is desired, the file can be empty.  Differences in regions which are specified in the mask are ignored in single nucleotide computations.
 
 The mask file itself is very simple in format.  It is always required, but can be
 * [an empty file](../reference/nil.txt).  Such files can be created very easily using ```touch``` which creates and empty file.  Example: ```touch my_new_exclusion_file.txt```
@@ -99,6 +102,5 @@ Catwalk's approach to this is to ignore samples which have more than some cutoff
 No.  This is because benchmarking indicates that it is often faster to recompute distances than to store the results. If you need to do store distances, please see [findNeighbour4](https://github.com/davidhwyllie/findNeighbour4).
 
 ## Does it handle IUPAC (ambiguity) codes?
-No.  Only A,C,G,T,N and - characters are accepted.  If you need to handle ambiguity, please see  [findNeighbour4](https://github.com/davidhwyllie/findNeighbour4).  This service ignores IUPAC codes in nucleotide distance computations, but it does store them and uses them in various quality/mixture calculations.
+No.  Only A,C,G,T,N and - characters are accepted.  If you need to handle ambiguity, please see  [findNeighbour4](https://github.com/davidhwyllie/findNeighbour4).  This service ignores IUPAC codes in nucleotide distance computations, but it does store them and uses them in various quality assessment and mixture detection calculations.
 
-W
