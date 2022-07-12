@@ -11,6 +11,8 @@ CatWalk offers
 * access via command line or REST-API interfaces, allowing incorporation into other components.
 * a web server interface, so individuals can look up results using the web server included in the package.
 
+There is a [paper in Microbial Genetics](https://doi.org/10.1099/mgen.0.000850) describing the software, its motivation and performance.
+
 A server storing bacterial genome data             |  allowing fast searches for related samples
 :-------------------------:|:-------------------------:
 ![cw_webui screenshot](doc/img/nCdxbXB.png)| ![cw_webui screenshot sample](doc/img/hWqTxek.png)
